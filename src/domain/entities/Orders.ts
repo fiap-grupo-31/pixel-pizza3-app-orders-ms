@@ -7,6 +7,7 @@ export class Orders {
   private readonly _amount: number;
   private readonly _status: string;
   private readonly _payment: string;
+  private readonly _orderDescription: string;
   private readonly _created_at: Date;
   private readonly _updated_at: Date;
 
@@ -18,6 +19,7 @@ export class Orders {
     amount: number | 0,
     status: string,
     payment: string | null,
+    orderDescription: string | null,
     created_at: Date | any,
     updated_at: Date | any
   ) {
@@ -28,6 +30,7 @@ export class Orders {
     this._amount = amount || 0;
     this._status = status || '';
     this._payment = payment ?? '';
+    this._orderDescription = orderDescription ?? '';
     this._created_at = created_at || '';
     this._updated_at = updated_at || '';
 
@@ -62,6 +65,10 @@ export class Orders {
 
   get payment (): string {
     return this._payment;
+  }
+
+  get orderDescription (): string {
+    return this._orderDescription;
   }
 
   get statusCheck (): boolean {

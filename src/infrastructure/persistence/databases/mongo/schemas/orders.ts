@@ -26,7 +26,8 @@ const ordersSchema = new Schema(
       type: String,
       enum: ['NONE', 'WAITING', 'APPROVED', 'DENIED']
     },
-    name: String
+    name: String,
+    orderDescription: String
   },
   {
     timestamps: {

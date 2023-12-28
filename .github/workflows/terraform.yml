@@ -25,13 +25,25 @@ jobs:
       run: |
         npm install
 
-    - name: Gera versão de distribuição
-      run: |
-        npm run build
-
     - name: Executa teste da aplicação
       run: |
         npm test
+
+  run-sonarqube:
+    runs-on: ubuntu-latest
+    needs:
+      - run-tests
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v2
+
+      - name: SonarQube Scan
+      - uses: sonarsource/sonarqube-scan-action@master
+        continue-on-error: false
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   build:
     runs-on: ubuntu-latest

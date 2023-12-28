@@ -5,6 +5,8 @@ import {
   ProductsGateway
 } from '../../domain/gateways';
 
+import { PaymentApiAdapter } from '../adapters/PaymentApiAdapter'
+import { ProductionApiAdapter } from '../adapters/ProductionApiAdapter'
 import { type DbConnection } from '../../domain/interfaces/dbconnection';
 import {
   OrdersUseCases,
@@ -257,7 +259,11 @@ export class OrdersController {
 
     let amountTotal: number = 0;
     let quantityTotal: number = 0;
-
+    const productsList: any = {};
+    const orderDescription: any = [
+      'Pedido: xxxxx',
+      ''
+    ];
     // valida se produto existe e se quantidade foi preenchida
     for (const item of orderItens) {
       if (!item?.productId) {
@@ -285,9 +291,15 @@ export class OrdersController {
         );
       }
 
+      orderDescription.push(`${item.quantity}x R$ ${products?._price}: ${products?._name}  R$ ${parseInt(item.quantity) * parseFloat(products?._price)}`)
+
+      productsList[item?.productId] = products;
+
       amountTotal += Number(products?._price);
       quantityTotal += Number(item?.quantity);
     }
+    orderDescription.push('')
+    orderDescription.push(`${quantityTotal} itens: Total  R$ ${amountTotal}`)
 
     // valida se existe customerId preenchido (vinculo a um cliente), caso não passa sem cliente definido
     if (customerId?.length) {
@@ -312,6 +324,7 @@ export class OrdersController {
       }
     }
 
+    const paymentApiAdapter = new PaymentApiAdapter(process.env.API_PAYMENT_BASEURL ?? '');
     // cria um pedido
     const order = await OrdersUseCases.setOrders(
       customerId,
@@ -319,6 +332,8 @@ export class OrdersController {
       amountTotal,
       status,
       payment,
+      orderDescription.join('\n'),
+      paymentApiAdapter,
       ordersGateway
     )
       .then((data) => {
@@ -355,18 +370,7 @@ export class OrdersController {
     }
 
     for (const product of orderItensList) {
-      const products = await ProductsUseCases.getProductsById(
-        product?._productId,
-        new ProductsGateway(dbconnection)
-      )
-        .then((data) => {
-          return data;
-        })
-        .catch((err) => {
-          return err;
-        });
-
-      product._product = products;
+      product._product = productsList[product?._productId] ?? {}
     }
 
     orderComplete._itens = orderItensList;
@@ -403,13 +407,18 @@ export class OrdersController {
         return err;
       });
 
+    const productionApiAdapter = new ProductionApiAdapter(process.env.API_PRODUCTION_BASEURL ?? '');
+
     const order = await OrdersUseCases.updateOrders(
       id,
       customer,
-      0,
-      0,
+      orderGet?._protocol,
+      orderGet?._quantity,
+      orderGet?._amount,
       status,
       payment ?? orderGet?._payment,
+      orderGet?._orderDescription,
+      productionApiAdapter,
       ordersGateway
     )
       .then((data) => {
@@ -448,13 +457,18 @@ export class OrdersController {
         return err;
       });
 
+    const productionApiAdapter = new ProductionApiAdapter(process.env.API_PRODUCTION_BASEURL ?? '');
+
     const order = await OrdersUseCases.updateOrders(
       id,
       orderGet?._customerId,
-      0,
-      0,
+      orderGet?._protocol,
+      orderGet?._quantity,
+      orderGet?._amount,
       orderGet?._status,
       payment,
+      orderGet?._orderDescription,
+      productionApiAdapter,
       ordersGateway
     )
       .then((data) => {

@@ -1,6 +1,8 @@
 /* eslint-disable prefer-promise-reject-errors */
 import { Orders } from '../../domain/entities/Orders';
 import { type OrdersGatewayInterface } from '../../domain/interfaces/OrdersGatewayInterface';
+import { type PaymentApiAdapter } from '../../interfaces/adapters/PaymentApiAdapter';
+import { type ProductionApiAdapter } from '../../interfaces/adapters/ProductionApiAdapter';
 
 class OrdersUseCases {
   static async getOrdersAll (
@@ -29,6 +31,8 @@ class OrdersUseCases {
     amount: number,
     status: string,
     payment: string,
+    orderDescription: string,
+    paymentApiAdapter: PaymentApiAdapter,
     ordersGateway: OrdersGatewayInterface
   ): Promise<Orders | null> {
     if (customerId) {
@@ -45,6 +49,7 @@ class OrdersUseCases {
       amount,
       status,
       payment,
+      orderDescription,
       null,
       null
     );
@@ -54,24 +59,35 @@ class OrdersUseCases {
     if (!entity.statusWithPaymentCheck) { return await Promise.reject('payment which status inválid'); }
 
     try {
-      const customers = await ordersGateway.persist(
+      const order = await ordersGateway.persist(
         customerId,
         quantity,
         amount,
         status,
-        payment
+        payment,
+        orderDescription
       );
-      return new Orders(
-        customers._id,
-        customers.protocol,
-        customers.customerId,
-        customers.quantity,
-        customers.amount,
-        customers.status,
-        customers.payment,
-        customers.created_at,
-        customers.updated_at
+      const orders = new Orders(
+        order._id,
+        order.protocol,
+        order.customerId,
+        order.quantity,
+        order.amount,
+        order.status,
+        order.payment,
+        order?.orderDescription,
+        order.created_at,
+        order.updated_at
       );
+
+      await paymentApiAdapter.createPayment(
+        order._id ?? '',
+        'fake',
+        order.quantity,
+        order.amount
+      )
+
+      return orders;
     } catch (error) {
       return await Promise.reject((error instanceof Error ? error.message : 'failure insert'));
     }
@@ -80,10 +96,13 @@ class OrdersUseCases {
   static async updateOrders (
     id: string,
     customerId: string | null,
+    protocol: string,
     quantity: number | 0,
     amount: number | 0,
     status: string,
     payment: string,
+    orderDescription: string,
+    productionApiAdapter: ProductionApiAdapter,
     ordersGateway: OrdersGatewayInterface
   ): Promise<Orders | null> {
     if (!status) return await Promise.reject('status inválid');
@@ -106,6 +125,7 @@ class OrdersUseCases {
       amount,
       status,
       payment,
+      orderDescription,
       null,
       null
     );
@@ -115,24 +135,33 @@ class OrdersUseCases {
     if (!entity.statusWithPaymentCheck) { return await Promise.reject('payment which status inválid'); }
 
     try {
-      const customers = await ordersGateway.update(
+      const order = await ordersGateway.update(
         id,
         customerId,
         quantity,
         amount,
         status,
-        payment
+        payment,
+        orderDescription
       );
+
+      await productionApiAdapter.createProduction(
+        id,
+        protocol,
+        orderDescription
+      )
+
       return new Orders(
-        customers._id,
-        customers.protocol,
-        customers.customerId,
-        customers.quantity,
-        customers.amount,
-        customers.status,
-        customers.payment,
-        customers.created_at,
-        customers.updated_at
+        order._id,
+        order.protocol,
+        order.customerId,
+        order.quantity,
+        order.amount,
+        order.status,
+        order.payment,
+        order?.orderDescription,
+        order.created_at,
+        order.updated_at
       );
     } catch (error) {
       return await Promise.reject('failure update');

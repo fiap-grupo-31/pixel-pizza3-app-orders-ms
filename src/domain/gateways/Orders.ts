@@ -24,6 +24,7 @@ export class OrdersGateway implements OrdersGatewayInterface {
         result.quantity,
         result.status,
         result.payment,
+        result?.orderDescription,
         result.created_at,
         result.updated_at
       );
@@ -47,6 +48,7 @@ export class OrdersGateway implements OrdersGatewayInterface {
             element.quantity,
             element.status,
             element.payment,
+            element?.orderDescription,
             element.created_at,
             element.updated_at
           )
@@ -73,6 +75,7 @@ export class OrdersGateway implements OrdersGatewayInterface {
             element.quantity,
             element.status,
             element.payment,
+            element?.orderDescription,
             element.created_at,
             element.updated_at
           )
@@ -87,7 +90,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
     quantity: number,
     amount: number,
     status: string,
-    payment: string | null
+    payment: string | null,
+    orderDescription: string | null
   ): Promise<any> {
     const orders = new Orders(
       '',
@@ -97,6 +101,7 @@ export class OrdersGateway implements OrdersGatewayInterface {
       quantity,
       status,
       payment,
+      orderDescription,
       null,
       null
     )
@@ -105,7 +110,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
       status: orders.status,
       payment: orders.payment,
       quantity: orders.quantity,
-      amount: orders.amount
+      amount: orders.amount,
+      orderDescription: orders.orderDescription
     }
 
     if (orders.customerId !== '') { objectPersist.customerId = orders.customerId; }
@@ -124,7 +130,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
     quantity: number,
     amount: number,
     status: string,
-    payment: string | null
+    payment: string | null,
+    orderDescription: string | null
   ): Promise<any> {
     const orders = new Orders(
       '',
@@ -134,6 +141,7 @@ export class OrdersGateway implements OrdersGatewayInterface {
       quantity,
       status,
       payment,
+      orderDescription,
       null,
       null
     )
