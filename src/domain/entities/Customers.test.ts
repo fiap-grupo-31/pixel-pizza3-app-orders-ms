@@ -21,6 +21,22 @@ describe('Customers', () => {
     expect(customers.name).toBe('John Doe');
   });
 
+  it('Teste para verificar se a função get birthdate retorna o valor correto', () => {
+    expect(customers.birthdate).toEqual(new Date('1990-01-01'));
+  });
+
+  it('Teste para verificar se a função get created_at retorna o valor correto', () => {
+    expect(customers.created_at).toEqual(new Date('2023-10-12 10:00:00'));
+  });
+
+  it('Teste para verificar se a função get updated_at retorna o valor correto', () => {
+    expect(customers.updated_at).toEqual(new Date('2023-10-12 10:00:00'));
+  });
+
+  it('Teste para verificar se a função get id retorna o valor correto', () => {
+    expect(customers.id).toBe('657e138ede2815270ca1d8dc');
+  });
+
   it('Teste para verificar se a função get cpf retorna o valor correto', () => {
     expect(customers.cpf).toBe('04207262091');
   });

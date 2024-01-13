@@ -23,13 +23,13 @@ export class Customers {
       throw new Error('cpf invalid');
     }
     this._id = id;
-    this._name = name || '';
-    this._mail = mail || '';
+    this._name = name;
+    this._mail = mail;
     this._cpf = cpf.match(/\d+/g)?.toString() ?? '';
-    this._birthdate = birthdate || new Date();
-    this._subscription = subscription || '';
-    this._created_at = created_at || '';
-    this._updated_at = updated_at || '';
+    this._birthdate = birthdate ?? new Date();
+    this._subscription = subscription;
+    this._created_at = created_at ?? '';
+    this._updated_at = updated_at ?? '';
   }
 
   get name (): string {
