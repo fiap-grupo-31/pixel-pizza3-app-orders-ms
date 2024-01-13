@@ -90,8 +90,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
     quantity: number,
     amount: number,
     status: string,
-    payment: string | null,
-    orderDescription: string | null
+    payment: string,
+    orderDescription: string
   ): Promise<any> {
     const orders = new Orders(
       '',
@@ -130,8 +130,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
     quantity: number,
     amount: number,
     status: string,
-    payment: string | null,
-    orderDescription: string | null
+    payment: string,
+    orderDescription: string
   ): Promise<any> {
     const orders = new Orders(
       '',

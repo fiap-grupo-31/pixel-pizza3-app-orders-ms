@@ -105,7 +105,7 @@ class OrdersUseCases {
 
   static async updateOrders (
     id: string,
-    customerId: string | null,
+    customerId: string,
     protocol: string,
     quantity: number,
     amount: number,

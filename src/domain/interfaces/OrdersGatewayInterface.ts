@@ -10,8 +10,8 @@ interface OrdersGatewayInterface {
     quantity: number,
     amount: number,
     status: string,
-    payment: string | null,
-    orderDescription: string | null
+    payment: string,
+    orderDescription: string
   ) => Promise<any>
   update: (
     id: string,
@@ -19,8 +19,8 @@ interface OrdersGatewayInterface {
     quantity: number,
     amount: number,
     status: string,
-    payment: string | null,
-    orderDescription: string | null
+    payment: string,
+    orderDescription: string
   ) => Promise<any>
   isValidId: (id: string) => Promise<boolean>
 }
