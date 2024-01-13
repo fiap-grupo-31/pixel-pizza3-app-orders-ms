@@ -100,6 +100,10 @@ jobs:
         chmod +x kubectl
         sudo mv kubectl /usr/local/bin/
         aws eks update-kubeconfig --name Fiap_Pixels-Eks
+        if ! kubectl create namespace kong; then
+          echo "Namespace exists, continuing..."
+          exit 0
+        fi
 
     - name: Instala o Helm e Instala o kong no kubernets (caso ele já exista não instala)
       run: |
