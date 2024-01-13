@@ -48,6 +48,42 @@ describe('Customers', () => {
     expect(validCustomer.isValid).toBe(true);
   });
 
+  it('Deve retornar erro de cpf invalido se o cpf for invalido', () => {
+    try {
+      const validCustomer = new Customers(
+        '657e138ede2815270ca1d8dc',
+        'John Doe',
+        'john@example.com',
+        '0000',
+        new Date('1990-01-01'),
+        'subscription',
+        new Date(),
+        new Date()
+      );
+      expect(validCustomer.isValid).toBe(true);
+    } catch (error: any) {
+      expect(error.message).toBe('cpf invalid');
+    }
+  });
+
+  it('Deve retornar erro de cpf sucesso se o cpf for vazio', () => {
+    try {
+      const validCustomer = new Customers(
+        '657e138ede2815270ca1d8dc',
+        'John Doe',
+        'john@example.com',
+        '',
+        new Date('1990-01-01'),
+        'subscription',
+        new Date(),
+        new Date()
+      );
+      expect(validCustomer.isValid).toBe(true);
+    } catch (error: any) {
+      expect(error.message).toBe('cpf invalid');
+    }
+  });
+
   it('Deve retornar false em caso de id inválido', () => {
     const validCustomer = new Customers(
       '123',
