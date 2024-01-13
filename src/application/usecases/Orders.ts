@@ -145,11 +145,13 @@ class OrdersUseCases {
         orderDescription
       );
 
-      await productionApiAdapter.createProduction(
-        id,
-        protocol,
-        orderDescription
-      )
+      if (status === 'RECEIVE' && payment === 'APPROVED') {
+        await productionApiAdapter.createProduction(
+          id,
+          protocol,
+          orderDescription
+        )
+      }
 
       return new Orders(
         order._id,
