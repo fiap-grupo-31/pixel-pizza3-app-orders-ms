@@ -392,7 +392,7 @@ export class OrdersController {
    */
   static async updateOrder (
     id: string,
-    customer: string,
+    customer: string | '',
     status: string,
     payment: string | null,
     dbconnection: DbConnection

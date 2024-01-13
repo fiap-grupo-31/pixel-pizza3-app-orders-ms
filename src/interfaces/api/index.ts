@@ -1466,7 +1466,7 @@ export class FastfoodApp {
 
       const products = await OrdersController.updateOrder(
         id,
-        null,
+        '',
         status,
         payment || null,
         this._dbconnection
