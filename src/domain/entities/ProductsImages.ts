@@ -20,13 +20,13 @@ export class ProductsImages {
     updated_at: any
   ) {
     this._id = id;
-    this._productId = productId || '';
-    this._name = name || '';
-    this._size = size || '';
-    this._type = type || '';
-    this._base64 = base64 || '';
-    this._created_at = created_at || '';
-    this._updated_at = updated_at || '';
+    this._productId = productId;
+    this._name = name;
+    this._size = size;
+    this._type = type;
+    this._base64 = base64;
+    this._created_at = created_at;
+    this._updated_at = updated_at;
   }
 
   get name (): string {

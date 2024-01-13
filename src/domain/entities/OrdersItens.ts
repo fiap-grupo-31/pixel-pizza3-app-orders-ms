@@ -20,13 +20,13 @@ export class OrdersItens {
     updated_at: any
   ) {
     this._id = id;
-    this._orderId = orderId || '';
-    this._productId = productId || '';
-    this._price = price || 0;
-    this._quantity = quantity || 0;
-    this._obs = obs || '';
-    this._created_at = created_at || '';
-    this._updated_at = updated_at || '';
+    this._orderId = orderId;
+    this._productId = productId;
+    this._price = price;
+    this._quantity = quantity;
+    this._obs = obs;
+    this._created_at = created_at ?? '';
+    this._updated_at = updated_at ?? '';
   }
 
   get orderId (): string {

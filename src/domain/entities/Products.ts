@@ -18,10 +18,10 @@ export class Products {
     updated_at: any
   ) {
     this._id = id;
-    this._name = name || '';
-    this._price = price || 0;
-    this._category = category || '';
-    this._description = description || '';
+    this._name = name;
+    this._price = price;
+    this._category = category;
+    this._description = description;
     this._created_at = created_at || '';
     this._updated_at = updated_at || '';
 

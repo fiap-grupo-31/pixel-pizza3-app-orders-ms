@@ -140,20 +140,4 @@ describe('Orders', () => {
       expect(error.message).toEqual('status invalid');
     }
   });
-
-  it('Deve criar um pedido válido', () => {
-    // Add your test scenarios for creating a valid order
-  });
-
-  it('Deve retornar erro de status invalido se o status for invalido', () => {
-    // Add your test scenarios for handling invalid status
-  });
-
-  it('Deve retornar false em caso de id inválido', () => {
-    // Add your test scenarios for handling invalid id
-  });
-
-  it('Deve retornar o objeto válido', () => {
-    // Add your test scenarios for comparing objects
-  });
 });
