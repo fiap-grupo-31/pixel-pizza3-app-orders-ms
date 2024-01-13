@@ -32,9 +32,15 @@ class ProductsUseCases {
     description: string,
     productsGateway: ProductsGatewayInterface
   ): Promise<Products | null> {
-    if (!name) return await Promise.reject('nome inválid');
-    if (!price) return await Promise.reject('price inválid');
-    if (!category) return await Promise.reject('category inválid');
+    if (!name) {
+      throw new Error('nome inválid');
+    }
+    if (!price) {
+      throw new Error('price inválid');
+    }
+    if (!category) {
+      throw new Error('category inválid');
+    }
 
     try {
       const entity = new Products(
@@ -63,7 +69,7 @@ class ProductsUseCases {
         product.updated_at
       );
     } catch (error) {
-      return await Promise.reject((error instanceof Error ? error.message : 'failure insert'));
+      throw new Error((error instanceof Error ? error.message : 'failure insert'));
     }
   }
 
@@ -75,9 +81,15 @@ class ProductsUseCases {
     description: string,
     productsGateway: ProductsGatewayInterface
   ): Promise<Products | null> {
-    if (!name) return await Promise.reject('nome inválid');
-    if (!price) return await Promise.reject('price inválid');
-    if (!category) return await Promise.reject('category inválid');
+    if (!name) {
+      throw new Error('nome inválid');
+    }
+    if (!price) {
+      throw new Error('price inválid');
+    }
+    if (!category) {
+      throw new Error('category inválid');
+    }
 
     try {
       const product = await productsGateway.update(
@@ -97,7 +109,7 @@ class ProductsUseCases {
         product.updated_at
       );
     } catch (error) {
-      return await Promise.reject('failure update');
+      throw new Error('failure update');
     }
   }
 
@@ -109,7 +121,7 @@ class ProductsUseCases {
       await productsGateway.remove(id);
       return await Promise.resolve('removed');
     } catch (error) {
-      return await Promise.reject('id inexistent');
+      throw new Error('id inexistent');
     }
   }
 }

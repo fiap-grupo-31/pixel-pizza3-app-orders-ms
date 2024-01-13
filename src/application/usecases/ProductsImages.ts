@@ -36,19 +36,35 @@ class ProductsImagesUseCases {
     ProductsImagesGateway: ProductsImagesGatewayInterface,
     ProductsGateway: ProductsGatewayInterface
   ): Promise<ProductsImages | null> {
-    if (!productId) return await Promise.reject('productId inválid');
-    if (productId.length !== 24) return await Promise.reject('productId inválid');
-    if (!name) return await Promise.reject('name inválid');
-    if (!size) return await Promise.reject('size inválid');
-    if (!type) return await Promise.reject('type inválid');
-    if (!base64) return await Promise.reject('base64 inválid');
+    if (!productId) {
+      throw new Error('id product inválid');
+    }
+    if (productId.length !== 24) {
+      throw new Error('id product inválid');
+    }
+    if (!name) {
+      throw new Error('name inválid');
+    }
+    if (!size) {
+      throw new Error('size inválid');
+    }
+    if (!type) {
+      throw new Error('type inválid');
+    }
+    if (!base64) {
+      throw new Error('base64 inválid');
+    }
 
     try {
       // objectIdIsValid
-      if (!await ProductsImagesGateway.isValidId(productId)) { return await Promise.reject('productId inválid'); }
+      if (!await ProductsImagesGateway.isValidId(productId)) {
+        throw new Error('id product inválid');
+      }
 
       const product = await ProductsGateway.findId(productId);
-      if (!product) return await Promise.reject('productId inexistent');
+      if (!product) {
+        throw new Error('productId inexistent');
+      }
 
       const productImage = await ProductsImagesGateway.persist(
         productId,
@@ -68,7 +84,7 @@ class ProductsImagesUseCases {
         productImage.updated_at
       );
     } catch (error) {
-      return await Promise.reject('failure insert');
+      throw new Error('failure insert');
     }
   }
 
@@ -81,26 +97,50 @@ class ProductsImagesUseCases {
     base64: string,
     ProductsImagesGateway: ProductsImagesGatewayInterface
   ): Promise<ProductsImages | null> {
-    if (!id) return await Promise.reject('id image inválid');
-    if (id.length !== 24) return await Promise.reject('id image inválid');
-    if (!productId) return await Promise.reject('id product inválid');
-    if (productId.length !== 24) return await Promise.reject('id product inválid');
-    if (!name) return await Promise.reject('name inválid');
-    if (!size) return await Promise.reject('size inválid');
-    if (!type) return await Promise.reject('type inválid');
-    if (!base64) return await Promise.reject('base64 inválid');
+    if (!id) {
+      throw new Error('id image inválid');
+    }
+    if (id.length !== 24) {
+      throw new Error('id image inválid');
+    }
+    if (!productId) {
+      throw new Error('id product inválid');
+    }
+    if (productId.length !== 24) {
+      throw new Error('id product inválid');
+    }
+    if (!name) {
+      throw new Error('name inválid');
+    }
+    if (!size) {
+      throw new Error('size inválid');
+    }
+    if (!type) {
+      throw new Error('type inválid');
+    }
+    if (!base64) {
+      throw new Error('base64 inválid');
+    }
 
     // objectIdIsValid
-    if (!await ProductsImagesGateway.isValidId(id)) { return await Promise.reject('id image inválid'); }
-    if (!await ProductsImagesGateway.isValidId(productId)) { return await Promise.reject('id product inválid'); }
+    if (!await ProductsImagesGateway.isValidId(id)) {
+      throw new Error('id image inválid');
+    }
+    if (!await ProductsImagesGateway.isValidId(productId)) {
+      throw new Error('id product inválid');
+    }
 
     const product = await ProductsImagesGateway.find({
       _id: id,
       productId
     });
 
-    if (!product) return await Promise.reject('product image inexistent');
-    if (!product?.length) return await Promise.reject('product image inexistent');
+    if (!product) {
+      throw new Error('product image inexistent');
+    }
+    if (!product?.length) {
+      throw new Error('product image inexistent');
+    }
 
     try {
       const productImage = await ProductsImagesGateway.update(
@@ -121,7 +161,7 @@ class ProductsImagesUseCases {
         productImage.updated_at
       );
     } catch (error) {
-      return await Promise.reject('failure update');
+      throw new Error('failure update');
     }
   }
 
@@ -133,7 +173,7 @@ class ProductsImagesUseCases {
       await ProductsImagesGateway.remove(id);
       return await Promise.resolve('removed');
     } catch (error) {
-      return await Promise.reject('id inexistent');
+      throw new Error('id inexistent');
     }
   }
 }

@@ -36,9 +36,13 @@ class OrdersUseCases {
     ordersGateway: OrdersGatewayInterface
   ): Promise<Orders | null> {
     if (customerId) {
-      if (customerId.length !== 24) { return await Promise.reject('customerId inválid'); }
+      if (customerId.length !== 24) {
+        throw new Error('customerId inválid');
+      }
 
-      if (!await ordersGateway.isValidId(customerId)) { return await Promise.reject('customerId inválid'); }
+      if (!await ordersGateway.isValidId(customerId)) {
+        throw new Error('customerId inválid');
+      }
     }
 
     const entity = new Orders(
@@ -54,9 +58,15 @@ class OrdersUseCases {
       null
     );
 
-    if (!entity.statusCheck) return await Promise.reject('status inválid');
-    if (!entity.paymentCheck) return await Promise.reject('payment inválid');
-    if (!entity.statusWithPaymentCheck) { return await Promise.reject('payment which status inválid'); }
+    if (!entity.statusCheck) {
+      throw new Error('status inválid');
+    }
+    if (!entity.paymentCheck) {
+      throw new Error('payment inválid');
+    }
+    if (!entity.statusWithPaymentCheck) {
+      throw new Error('payment which status inválid');
+    }
 
     try {
       const order = await ordersGateway.persist(
@@ -89,7 +99,7 @@ class OrdersUseCases {
 
       return orders;
     } catch (error) {
-      return await Promise.reject((error instanceof Error ? error.message : 'failure insert'));
+      throw new Error((error instanceof Error ? error.message : 'failure insert'));
     }
   }
 
@@ -105,7 +115,9 @@ class OrdersUseCases {
     productionApiAdapter: ProductionApiAdapter,
     ordersGateway: OrdersGatewayInterface
   ): Promise<Orders | null> {
-    if (!status) return await Promise.reject('status inválid');
+    if (!status) {
+      throw new Error('status inválid');
+    }
 
     if (['DENIED', 'CANCELED'].includes(payment)) {
       status = 'CANCELED';
@@ -130,9 +142,15 @@ class OrdersUseCases {
       null
     );
 
-    if (!entity.statusCheck) return await Promise.reject('status inválid');
-    if (!entity.paymentCheck) return await Promise.reject('payment inválid');
-    if (!entity.statusWithPaymentCheck) { return await Promise.reject('payment which status inválid'); }
+    if (!entity.statusCheck) {
+      throw new Error('status inválid');
+    }
+    if (!entity.paymentCheck) {
+      throw new Error('payment inválid');
+    }
+    if (!entity.statusWithPaymentCheck) {
+      throw new Error('payment which status inválid');
+    }
 
     try {
       const order = await ordersGateway.update(
@@ -166,7 +184,7 @@ class OrdersUseCases {
         order.updated_at
       );
     } catch (error) {
-      return await Promise.reject('failure update');
+      throw new Error('failure update');
     }
   }
 
@@ -178,7 +196,7 @@ class OrdersUseCases {
       await ordersGateway.remove(id);
       return await Promise.resolve('removed');
     } catch (error) {
-      return await Promise.reject('id inexistent');
+      throw new Error((error instanceof Error ? error.message : 'id inexistent'));
     }
   }
 }

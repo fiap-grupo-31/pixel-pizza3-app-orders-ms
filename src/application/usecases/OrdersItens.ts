@@ -31,9 +31,13 @@ class OrdersItensUseCases {
     obs: string,
     ordersItensGateway: OrdersItensGatewayInterface
   ): Promise<OrdersItens | null> {
-    if (orderId.length !== 24 || !await ordersItensGateway.isValidId(orderId)) { return await Promise.reject('orderId inválid'); }
+    if (orderId.length !== 24 || !await ordersItensGateway.isValidId(orderId)) {
+      throw new Error('orderId inválid');
+    }
 
-    if (productId.length !== 24 || !await ordersItensGateway.isValidId(productId)) { return await Promise.reject('productId inválid'); }
+    if (productId.length !== 24 || !await ordersItensGateway.isValidId(productId)) {
+      throw new Error('productId inválid');
+    }
 
     try {
       const orders = await ordersItensGateway.persist(
@@ -54,7 +58,7 @@ class OrdersItensUseCases {
         orders.updated_at
       );
     } catch (error) {
-      return await Promise.reject('failure insert');
+      throw new Error('failure insert');
     }
   }
 
@@ -83,7 +87,7 @@ class OrdersItensUseCases {
         orders.updated_at
       );
     } catch (error) {
-      return await Promise.reject('failure update');
+      throw new Error('failure update');
     }
   }
 
@@ -95,7 +99,7 @@ class OrdersItensUseCases {
       await ordersItensGateway.remove(id);
       return await Promise.resolve('removed');
     } catch (error) {
-      return await Promise.reject('id inexistent');
+      throw new Error('id inexistent');
     }
   }
 
@@ -110,7 +114,7 @@ class OrdersItensUseCases {
       });
       return await Promise.resolve('removed');
     } catch (error) {
-      return await Promise.reject('id inexistent');
+      throw new Error('id inexistent');
     }
   }
 }

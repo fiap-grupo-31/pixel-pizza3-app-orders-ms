@@ -54,7 +54,7 @@ class CustomersUseCases {
         customer.updated_at
       );
     } catch (error) {
-      return await Promise.reject((error instanceof Error ? error.message : 'failure insert'));
+      throw new Error((error instanceof Error ? error.message : 'failure insert'));
     }
   }
 
@@ -67,7 +67,9 @@ class CustomersUseCases {
     subscription: string,
     customersGateway: CustomersGatewayInterface
   ): Promise<Customers | null> {
-    if (!name) return await Promise.reject('nome inválid');
+    if (!name) {
+      throw new Error('nome inválid');
+    }
 
     try {
       const customer = await customersGateway.update(
@@ -89,7 +91,7 @@ class CustomersUseCases {
         customer.updated_at
       );
     } catch (error) {
-      return await Promise.reject((error instanceof Error ? error.message : 'failure update'));
+      throw new Error((error instanceof Error ? error.message : 'failure update'));
     }
   }
 
@@ -101,7 +103,7 @@ class CustomersUseCases {
       await customersGateway.remove(id);
       return await Promise.resolve('removed');
     } catch (error) {
-      return await Promise.reject('id inexistent');
+      throw new Error((error instanceof Error ? error.message : 'id inexistent'));
     }
   }
 }
