@@ -141,13 +141,13 @@ export class OrdersItemsGateway implements OrdersItensGatewayInterface {
     return success;
   }
 
-  async remove (id: string): Promise<any | null> {
+  async remove (id: string): Promise<any> {
     const result = await this.repositorioDados.remove(this.schema, id);
 
     return result;
   }
 
-  async removeFind (reference: Record<string, any>): Promise<any | null> {
+  async removeFind (reference: Record<string, any>): Promise<any> {
     const result = await this.repositorioDados.removeFind(
       this.schema,
       reference
@@ -156,7 +156,7 @@ export class OrdersItemsGateway implements OrdersItensGatewayInterface {
     return result;
   }
 
-  async isValidId (id: string): Promise<Boolean> {
+  async isValidId (id: string): Promise<boolean> {
     const result = await this.repositorioDados.isValidId(id);
 
     return result;

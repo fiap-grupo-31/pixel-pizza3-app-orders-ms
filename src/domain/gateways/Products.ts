@@ -136,7 +136,7 @@ export class ProductsGateway implements ProductsGatewayInterface {
     return success;
   }
 
-  async remove (id: string): Promise<any | null> {
+  async remove (id: string): Promise<any> {
     const result = await this.repositorioDados.remove(this.schema, id);
 
     return result;

@@ -15,13 +15,13 @@ export class Orders {
     id: string,
     protocol: number,
     customerId: string | null,
-    quantity: number | 0,
-    amount: number | 0,
+    quantity: number,
+    amount: number,
     status: string,
     payment: string | null,
     orderDescription: string | null,
-    created_at: Date | any,
-    updated_at: Date | any
+    created_at: any,
+    updated_at: any
   ) {
     this._id = id;
     this._protocol = protocol || 0;

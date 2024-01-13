@@ -3,7 +3,7 @@ import { type ProductsImages } from 'src/domain/entities/ProductsImages';
 interface ProductsImagesGatewayInterface {
   findId: (id: string) => Promise<ProductsImages | null>
   find: (Reference: Record<string, any>) => Promise<ProductsImages[] | null>
-  remove: (id: string) => Promise<any | null>
+  remove: (id: string) => Promise<any>
   findAll: () => Promise<ProductsImages[] | null>
   persist: (
     productId: string,
@@ -19,7 +19,7 @@ interface ProductsImagesGatewayInterface {
     type: string,
     base64: string
   ) => Promise<any>
-  isValidId: (id: string) => Promise<Boolean>
+  isValidId: (id: string) => Promise<boolean>
 }
 
 export type { ProductsImagesGatewayInterface }

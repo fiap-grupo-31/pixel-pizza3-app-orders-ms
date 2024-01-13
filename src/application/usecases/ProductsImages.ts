@@ -168,7 +168,7 @@ class ProductsImagesUseCases {
   static async removeProductsImagesById (
     id: string,
     ProductsImagesGateway: ProductsImagesGatewayInterface
-  ): Promise<any | null> {
+  ): Promise<any> {
     try {
       await ProductsImagesGateway.remove(id);
       return await Promise.resolve('removed');

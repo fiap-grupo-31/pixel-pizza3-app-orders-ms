@@ -3,7 +3,7 @@ import { type Orders } from 'src/domain/entities/Orders';
 interface OrdersGatewayInterface {
   findId: (id: string) => Promise<Orders | null>
   find: (Reference: Record<string, any>) => Promise<Orders[] | null>
-  remove: (id: string) => Promise<any | null>
+  remove: (id: string) => Promise<any>
   findAll: () => Promise<Orders[] | null>
   persist: (
     customer: string | null,
@@ -22,7 +22,7 @@ interface OrdersGatewayInterface {
     payment: string | null,
     orderDescription: string | null
   ) => Promise<any>
-  isValidId: (id: string) => Promise<Boolean>
+  isValidId: (id: string) => Promise<boolean>
 }
 
 export type { OrdersGatewayInterface }

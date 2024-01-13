@@ -20,8 +20,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
         result.id,
         result.protocol,
         result.customerId,
-        result.amount,
         result.quantity,
+        result.amount,
         result.status,
         result.payment,
         result?.orderDescription,
@@ -44,8 +44,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
             element.id,
             element.protocol,
             element.customerId,
-            element.amount,
             element.quantity,
+            element.amount,
             element.status,
             element.payment,
             element?.orderDescription,
@@ -71,8 +71,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
             element.id,
             element.protocol,
             element.customerId,
-            element.amount,
             element.quantity,
+            element.amount,
             element.status,
             element.payment,
             element?.orderDescription,
@@ -106,7 +106,7 @@ export class OrdersGateway implements OrdersGatewayInterface {
       null
     )
 
-    const objectPersist: Object | any = {
+    const objectPersist: any = {
       status: orders.status,
       payment: orders.payment,
       quantity: orders.quantity,
@@ -137,8 +137,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
       '',
       0,
       customerId,
-      amount,
       quantity,
+      amount,
       status,
       payment,
       orderDescription,
@@ -146,7 +146,7 @@ export class OrdersGateway implements OrdersGatewayInterface {
       null
     )
 
-    const objectPersist: Object | any = {
+    const objectPersist: any = {
       status: orders.status,
       payment: orders.payment
     }
@@ -162,13 +162,13 @@ export class OrdersGateway implements OrdersGatewayInterface {
     return success;
   }
 
-  async remove (id: string): Promise<any | null> {
+  async remove (id: string): Promise<any> {
     const result = await this.repositorioDados.remove(this.schema, id);
 
     return result;
   }
 
-  async isValidId (id: string): Promise<Boolean> {
+  async isValidId (id: string): Promise<boolean> {
     const result = await this.repositorioDados.isValidId(id);
 
     return result;

@@ -19,7 +19,7 @@ export class CustomersController {
     * @memberof CustomersController
     */
   static async getCustomers (
-    cpf: string | any,
+    cpf: any,
     dbconnection: DbConnection): Promise<any> {
     const customersGateway = new CustomersGateway(dbconnection);
     if (cpf) {

@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance, type AxiosResponse, AxiosError } from 'axios';
+import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
 
 export interface ProductionApiAdapterInterface {
   createProduction: (orderId: string, protocol: string, orderDescription: string) => Promise<boolean>

@@ -33,7 +33,9 @@ class CustomersUseCases {
     subscription: string,
     customersGateway: CustomersGatewayInterface
   ): Promise<Customers | null> {
-    if (!name) return await Promise.reject('nome inválid');
+    if (!name) {
+      throw new Error('nome inválid');
+    }
 
     try {
       const customer = await customersGateway.persist(
@@ -98,7 +100,7 @@ class CustomersUseCases {
   static async removeCustomersById (
     id: string,
     customersGateway: CustomersGatewayInterface
-  ): Promise<any | null> {
+  ): Promise<any> {
     try {
       await customersGateway.remove(id);
       return await Promise.resolve('removed');

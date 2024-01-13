@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance, type AxiosResponse, AxiosError } from 'axios';
+import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
 
 export interface PaymentApiAdapterInterface {
   createPayment: (orderId: string, broker: string, quantity: number, amount: number) => Promise<boolean>

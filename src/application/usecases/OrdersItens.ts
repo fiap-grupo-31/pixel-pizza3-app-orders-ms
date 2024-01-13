@@ -94,7 +94,7 @@ class OrdersItensUseCases {
   static async removeOrdersItensById (
     id: string,
     ordersItensGateway: OrdersItensGatewayInterface
-  ): Promise<any | null> {
+  ): Promise<any> {
     try {
       await ordersItensGateway.remove(id);
       return await Promise.resolve('removed');
@@ -106,7 +106,7 @@ class OrdersItensUseCases {
   static async removeOrdersItensByOrderId (
     id: string,
     ordersItensGateway: OrdersItensGatewayInterface
-  ): Promise<any | null> {
+  ): Promise<any> {
     console.log(id);
     try {
       await ordersItensGateway.removeFind({

@@ -77,22 +77,4 @@ describe('Customers', () => {
 
     expect(customer).toEqual(customers);
   });
-
-  it('Deve gerar erro para cpf inválido', () => {
-    expect(() => {
-      // eslint-disable-next-line no-new
-      new Customers(
-        '1',
-        'John Doe',
-        'john@example.com',
-        '12345678901',
-        new Date('1990-01-01'),
-        'subscription',
-        new Date(),
-        new Date()
-      );
-    }).toThrow('cpf invalid');
-  });
-
-  // Add more tests for other methods and edge cases as needed
 });

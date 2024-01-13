@@ -1,7 +1,5 @@
-import { type Customers } from 'src/domain/entities';
-
 export const CustomerAdapter = {
-  adaptObjectCustomer: function (data: Customers | any): any {
+  adaptObjectCustomer: function (data: any): any {
     if (data === null) {
       return {};
     }

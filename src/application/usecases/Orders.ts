@@ -107,8 +107,8 @@ class OrdersUseCases {
     id: string,
     customerId: string | null,
     protocol: string,
-    quantity: number | 0,
-    amount: number | 0,
+    quantity: number,
+    amount: number,
     status: string,
     payment: string,
     orderDescription: string,
@@ -191,7 +191,7 @@ class OrdersUseCases {
   static async removeOrdersById (
     id: string,
     ordersGateway: OrdersGatewayInterface
-  ): Promise<any | null> {
+  ): Promise<any> {
     try {
       await ordersGateway.remove(id);
       return await Promise.resolve('removed');

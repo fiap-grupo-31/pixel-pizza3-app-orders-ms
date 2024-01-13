@@ -16,8 +16,8 @@ export class Customers {
     cpf: string,
     birthdate: Date,
     subscription: string,
-    created_at: Date | any,
-    updated_at: Date | any
+    created_at: any,
+    updated_at: any
   ) {
     if (!this.isValidCpf(cpf)) {
       throw new Error('cpf invalid');
@@ -91,7 +91,7 @@ export class Customers {
     let soma = 0;
     let resto;
     // eslint-disable-next-line no-var
-    for (var i = 1; i <= 9; i++) {
+    for (let i = 1; i <= 9; i++) {
       soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i);
     }
     resto = (soma * 10) % 11;
@@ -99,7 +99,7 @@ export class Customers {
     if (resto !== parseInt(cpf.substring(9, 10))) return false;
     soma = 0;
     // eslint-disable-next-line no-var, @typescript-eslint/no-redeclare
-    for (var i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 10; i++) {
       soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i);
     }
     resto = (soma * 10) % 11;

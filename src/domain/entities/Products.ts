@@ -14,8 +14,8 @@ export class Products {
     price: number,
     category: string,
     description: string,
-    created_at: Date | any,
-    updated_at: Date | any
+    created_at: any,
+    updated_at: any
   ) {
     this._id = id;
     this._name = name || '';
