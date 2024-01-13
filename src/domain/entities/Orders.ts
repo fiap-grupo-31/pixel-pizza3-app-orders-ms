@@ -14,25 +14,25 @@ export class Orders {
   constructor (
     id: string,
     protocol: number,
-    customerId: string | null,
+    customerId: string,
     quantity: number,
     amount: number,
     status: string,
-    payment: string | null,
-    orderDescription: string | null,
+    payment: string,
+    orderDescription: string,
     created_at: any,
     updated_at: any
   ) {
     this._id = id;
-    this._protocol = protocol ?? 0;
-    this._customerId = customerId ?? '';
-    this._quantity = quantity ?? 0;
-    this._amount = amount ?? 0;
-    this._status = status ?? '';
-    this._payment = payment ?? '';
-    this._orderDescription = orderDescription ?? '';
-    this._created_at = created_at ?? '';
-    this._updated_at = updated_at ?? '';
+    this._protocol = protocol;
+    this._customerId = customerId;
+    this._quantity = quantity;
+    this._amount = amount;
+    this._status = status;
+    this._payment = payment;
+    this._orderDescription = orderDescription;
+    this._created_at = created_at;
+    this._updated_at = updated_at;
 
     if (!this.statusCheck) {
       throw new Error('status invalid');

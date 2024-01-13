@@ -75,7 +75,7 @@ describe('Orders', () => {
   });
 
   it('Teste para verificar se a função statusWithPaymentCheck retorna true em caso de waiting e receive', () => {
-    const orders = new Orders(
+    const orders1 = new Orders(
       '657e138ede2815270ca1d8dc',
       123,
       'customer123',
@@ -87,44 +87,44 @@ describe('Orders', () => {
       new Date('2023-10-12 10:00:00'),
       new Date('2023-10-12 10:00:00')
     );
-    expect(orders.statusWithPaymentCheck).toEqual(true);
+    expect(orders1.statusWithPaymentCheck).toEqual(true);
   });
 
   it('Teste para verificar se a função statusWithPaymentCheck retorna true em caso de CANCELED', () => {
-    const orders = new Orders(
+    const orders2 = new Orders(
       '657e138ede2815270ca1d8dc',
       123,
       'customer123',
       2,
-      50.0,
+      20.0,
       'RECEIVE',
       'CANCELED',
       'Order Description',
       new Date('2023-10-12 10:00:00'),
       new Date('2023-10-12 10:00:00')
     );
-    expect(orders.statusWithPaymentCheck).toEqual(true);
+    expect(orders2.statusWithPaymentCheck).toEqual(true);
   });
 
   it('Teste para verificar se a função statusWithPaymentCheck retorna true em caso de APPROVED com receive', () => {
-    const orders = new Orders(
+    const orders3 = new Orders(
       '657e138ede2815270ca1d8dc',
       123,
       'customer123',
       2,
-      50.0,
+      10.0,
       'IN_PROGRESS',
       'APPROVED',
       'Order Description',
       new Date('2023-10-12 10:00:00'),
       new Date('2023-10-12 10:00:00')
     );
-    expect(orders.statusWithPaymentCheck).toEqual(true);
+    expect(orders3.statusWithPaymentCheck).toEqual(true);
   });
 
   it('Teste para verificar se retorna exceção caso statusCheck for invalido', () => {
     try {
-      const orders = new Orders(
+      const orders4 = new Orders(
         '657e138ede2815270ca1d8dc',
         123,
         'customer123',
