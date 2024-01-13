@@ -24,15 +24,15 @@ export class Orders {
     updated_at: any
   ) {
     this._id = id;
-    this._protocol = protocol || 0;
+    this._protocol = protocol ?? 0;
     this._customerId = customerId ?? '';
-    this._quantity = quantity || 0;
-    this._amount = amount || 0;
-    this._status = status || '';
+    this._quantity = quantity ?? 0;
+    this._amount = amount ?? 0;
+    this._status = status ?? '';
     this._payment = payment ?? '';
     this._orderDescription = orderDescription ?? '';
-    this._created_at = created_at || '';
-    this._updated_at = updated_at || '';
+    this._created_at = created_at ?? '';
+    this._updated_at = updated_at ?? '';
 
     if (!this.statusCheck) {
       throw new Error('status invalid');
