@@ -33,6 +33,9 @@ services:
       DB_USER: root
       DB_PASS: AOjtR096G3l
       DNS_PUBLIC: 'http://localhost:8080'
+      API_ORDER_BASEURL: http://localhost:8000/api/v1.0/
+      API_PAYMENT_BASEURL: http://localhost:8000/api/v1.0/
+      API_PRODUCTION_BASEURL: http://localhost:8000/api/v1.0/
     depends_on:
       - mongo
     networks:

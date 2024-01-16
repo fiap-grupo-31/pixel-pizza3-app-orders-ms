@@ -27,7 +27,6 @@ export class ProductionApiAdapter implements ProductionApiAdapterInterface {
 
       return true;
     } catch (error) {
-      console.log(error)
       return false;
     }
   }

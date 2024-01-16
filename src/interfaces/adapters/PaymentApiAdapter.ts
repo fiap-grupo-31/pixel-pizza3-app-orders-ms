@@ -28,7 +28,6 @@ export class PaymentApiAdapter implements PaymentApiAdapterInterface {
 
       return true;
     } catch (error) {
-      console.log(error)
       return false;
     }
   }

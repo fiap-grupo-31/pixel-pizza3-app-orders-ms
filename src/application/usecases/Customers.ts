@@ -11,7 +11,7 @@ class CustomersUseCases {
   }
 
   static async getCustomersByParameter (
-    reference: Record<string, any> = {},
+    reference: Record<string, any>,
     customersGateway: CustomersGatewayInterface
   ): Promise<Customers[] | null> {
     return await customersGateway.find(reference);
@@ -33,7 +33,7 @@ class CustomersUseCases {
     subscription: string,
     customersGateway: CustomersGatewayInterface
   ): Promise<Customers | null> {
-    if (!name) {
+    if (name.length === 0) {
       throw new Error('nome inválid');
     }
 
