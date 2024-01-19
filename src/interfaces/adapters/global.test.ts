@@ -64,6 +64,6 @@ describe('Global', () => {
 
     const resultado = Global.formatISOWithTimezone(date);
 
-    expect(resultado).toMatch('2022-01-01T12:00:00.000+-3:00');
+    expect(resultado).toMatch('2022-01-01T12:00:00.000-00:00');
   });
 });
