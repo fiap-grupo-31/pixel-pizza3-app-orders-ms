@@ -41,10 +41,10 @@ export class CustomersGateway implements CustomersGatewayInterface {
           new Customers(
             element.id,
             element.name,
-            element.mail || '',
-            element.cpf || '',
-            element.birthdate || '',
-            element.subscription || '',
+            element.mail,
+            element.cpf,
+            element.birthdate,
+            element.subscription,
             element.created_at,
             element.updated_at
           )

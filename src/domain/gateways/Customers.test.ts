@@ -39,6 +39,45 @@ describe('CustomersGateway', () => {
     expect(dbConnectionMock.findId).toHaveBeenCalledWith('customers', '1');
   });
 
+  it('deve encontrar um cliente por referencia', async () => {
+    dbConnectionMock.find.mockResolvedValueOnce([{
+      id: '1',
+      name: 'John Doe',
+      mail: 'john@example.com',
+      cpf: '33811205811',
+      birthdate: '1990-01-01',
+      subscription: 'premium',
+      created_at: new Date(),
+      updated_at: new Date()
+    }]);
+
+    const customersGateway = new CustomersGateway(dbConnectionMock);
+
+    const result: any = await customersGateway.find({
+      _cpf: '33811205811'
+    });
+
+    expect(result[0]).toBeInstanceOf(Customers);
+    expect(dbConnectionMock.find).toHaveBeenCalledWith('customers', {
+      _cpf: '33811205811'
+    });
+  });
+
+  it('deve retornar null caso não ache um cliente por referencia', async () => {
+    dbConnectionMock.find.mockResolvedValueOnce(null);
+
+    const customersGateway = new CustomersGateway(dbConnectionMock);
+
+    const result: any = await customersGateway.find({
+      _cpf: '33811205811'
+    });
+
+    expect(result).toBeNull();
+    expect(dbConnectionMock.find).toHaveBeenCalledWith('customers', {
+      _cpf: '33811205811'
+    });
+  });
+
   it('deve retornar null ao encontrar cliente por ID inexistente', async () => {
     dbConnectionMock.findId.mockResolvedValueOnce(null);
 
@@ -67,6 +106,17 @@ describe('CustomersGateway', () => {
     const result = await customersGateway.findAll();
 
     expect(result?.length).toEqual(1);
+  });
+
+  it('deve retornar null caso não ache todos os clientes', async () => {
+    dbConnectionMock.findAll.mockResolvedValueOnce(null);
+
+    const customersGateway = new CustomersGateway(dbConnectionMock);
+
+    const result: any = await customersGateway.findAll();
+
+    expect(result).toBeNull();
+    expect(dbConnectionMock.findAll).toHaveBeenCalledWith('customers');
   });
 
   it('deve remover um cliente e por id', async () => {
