@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
 import { ProductsController } from '../controllers/products';
 import { ProductsImagesController } from '../controllers/productsImages';
 import { CustomersController } from '../controllers/customers';
 import { OrdersController } from '../controllers/orders';
 
 import { type DbConnection } from '../../domain/interfaces/dbconnection';
-import express, { type Request, type Response } from 'express';
+import express, { type RequestHandler, type Request, type Response } from 'express';
 import bodyParser from 'body-parser';
 
 import { Global } from '../adapters';
@@ -14,7 +13,8 @@ import path from 'path';
 
 export class FastfoodApp {
   private readonly _dbconnection: DbConnection;
-  private readonly _app = express();
+  public readonly _app = express();
+  private server: any = null;
 
   constructor (dbconnection: DbConnection) {
     this._dbconnection = dbconnection;
@@ -50,37 +50,14 @@ export class FastfoodApp {
     const swaggerUi = require('swagger-ui-express');
     this._app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-    this.routes();
-    const server = this._app.listen(port, () => {
-      console.log(`Fiap app listening on port ${port}`);
-      if (process.env.CI) {
-        process.exit(0);
-      }
-    });
-    server.keepAliveTimeout = 30 * 1000;
-    server.headersTimeout = 35 * 1000;
-  }
-
-  routes (): void {
-    this.routesApp();
-    this.routesProducts();
-    this.routesProductsImages();
-    this.routesCustomers();
-    this.routesOrders();
-  }
-
-  routesApp (): void {
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this._app.get('/', async (_req: Request, res: Response) => {
+    this._app.get('/', (async (_req: Request, res: Response): Promise<void> => {
       const filePath = path.join(
         path.resolve(__dirname, '../../'),
         'SimulationPage.html'
       );
       res.sendFile(filePath);
-    });
-  }
+    }) as RequestHandler);
 
-  routesProducts (): void {
     /**
      * @swagger
      * /products:
@@ -132,8 +109,7 @@ export class FastfoodApp {
      *                 message:
      *                   type: string
      */
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this._app.get('/products', async (req: Request, res: Response) => {
+    this._app.get('/products', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { category } = req.query;
       const products = await ProductsController.getProducts(
@@ -142,7 +118,7 @@ export class FastfoodApp {
       );
 
       res.status(products.statusCode || 404).send(products);
-    });
+    }) as RequestHandler);
 
     /**
      * @swagger
@@ -193,8 +169,7 @@ export class FastfoodApp {
      *                 message:
      *                   type: string
      */
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this._app.get('/products/:id', async (req: Request, res: Response) => {
+    this._app.get('/products/:id', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { id } = req.params;
 
@@ -203,7 +178,7 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.status(products.statusCode || 404).send(products);
-    });
+    }) as RequestHandler);
 
     /**
      * @swagger
@@ -263,8 +238,7 @@ export class FastfoodApp {
      *                 message:
      *                   type: string
      */
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this._app.post('/products', async (req: Request, res: Response) => {
+    this._app.post('/products', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { name, price, category, description } = req.body;
 
@@ -276,7 +250,7 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.status(products.statusCode || 404).send(products);
-    });
+    }) as RequestHandler);
 
     /**
      * @swagger
@@ -343,8 +317,7 @@ export class FastfoodApp {
      *                 message:
      *                   type: string
      */
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this._app.put('/products/:id', async (req: Request, res: Response) => {
+    this._app.put('/products/:id', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { id } = req.params;
       const { name, price, category, description } = req.body;
@@ -358,7 +331,7 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.status(products.statusCode || 404).send(products);
-    });
+    }) as RequestHandler);
 
     /**
      * @swagger
@@ -398,8 +371,7 @@ export class FastfoodApp {
      *                 message:
      *                   type: string
      */
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this._app.delete('/products/:id', async (req: Request, res: Response) => {
+    this._app.delete('/products/:id', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { id } = req.params;
 
@@ -408,735 +380,8 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.status(products.statusCode || 404).send(products);
-    });
-  }
+    }) as RequestHandler);
 
-  routesProductsImages (): void {
-    /**
-     * @swagger
-     * /products/:id/images:
-     *   get:
-     *     summary: Retorna as imagens de um produto cadastrado
-     *     tags:
-     *       - ProductsImages
-     *     parameters:
-     *       - in: path
-     *         name: id
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: id do produto a ser localizado as imagesns
-     *     responses:
-     *       200:
-     *         description: Successful response
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 data:
-     *                   type: array
-     *                   items:
-     *                     type: object
-     *                     properties:
-     *                       _id:
-     *                         type: string
-     *                       _productId:
-     *                         type: string
-     *                       _name:
-     *                         type: string
-     *                       _size:
-     *                         type: number
-     *                       _type:
-     *                         type: string
-     *                       _base64:
-     *                         type: string
-     *       404:
-     *         description: Products not found
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 message:
-     *                   type: string
-     */
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this._app.get(
-      '/products/:id/images',
-      async (req: Request, res: Response) => {
-        res.setHeader('Content-type', 'application/json');
-        const { id } = req.params;
-
-        const products =
-          await ProductsImagesController.getProductsImagesByProductId(
-            {
-              productId: id
-            },
-            this._dbconnection
-          );
-        res.send(products);
-      }
-    );
-
-    /**
-     * @swagger
-     * /products/:id/images:
-     *   post:
-     *     summary: Cadastra uma imagem dentro de um produto
-     *     tags:
-     *       - ProductsImages
-     *     parameters:
-     *       - in: path
-     *         name: id
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: id do produto a ser cadastrado a imagem
-     *     requestBody:
-     *       required: true
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             properties:
-     *               name:
-     *                 type: string
-     *               size:
-     *                 type: number
-     *               type:
-     *                 type: string
-     *               base64:
-     *                 type: string
-     *     responses:
-     *       200:
-     *         description: Successful response
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 data:
-     *                   type: object
-     *                   properties:
-     *                     _id:
-     *                       type: string
-     *                     _name:
-     *                       type: string
-     *                     _price:
-     *                       type: number
-     *                     _category:
-     *                       type: string
-     *                       enum: [ACCOMPANIMENT, DESSERT, DRINK, SNACK]
-     *                     _description:
-     *                       type: string
-     *       404:
-     *         description: Products not found
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 message:
-     *                   type: string
-     */
-    this._app.post(
-      '/products/:id/images',
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      async (req: Request, res: Response) => {
-        res.setHeader('Content-type', 'application/json');
-        const { id } = req.params;
-        const { name, size, type, base64 } = req.body;
-
-        const products = await ProductsImagesController.setProductImage(
-          id,
-          name,
-          size,
-          type,
-          base64,
-          this._dbconnection
-        );
-        res.send(products);
-      }
-    );
-
-    /**
-     * @swagger
-     * /products/:id/images/:imageId:
-     *   get:
-     *     summary: Retorna uma imagen especifica de um produto cadastrado
-     *     tags:
-     *       - ProductsImages
-     *     parameters:
-     *       - in: path
-     *         name: id
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: id do produto a ser localizado a imagem
-     *       - in: path
-     *         name: imageId
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: id da imagem a ser localizada dentro do produto
-     *     responses:
-     *       200:
-     *         description: Successful response
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 data:
-     *                   type: array
-     *                   items:
-     *                     type: object
-     *                     properties:
-     *                       _id:
-     *                         type: string
-     *                       _productId:
-     *                         type: string
-     *                       _name:
-     *                         type: string
-     *                       _size:
-     *                         type: number
-     *                       _type:
-     *                         type: string
-     *                       _base64:
-     *                         type: string
-     *       404:
-     *         description: Products not found
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 message:
-     *                   type: string
-     */
-    this._app.get(
-      '/products/:id/images/:imageId',
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      async (req: Request, res: Response) => {
-        res.setHeader('Content-type', 'application/json');
-        const { id, imageId } = req.params;
-
-        const products =
-          await ProductsImagesController.getProductsImagesByProductId(
-            {
-              _id: imageId,
-              productId: id
-            },
-            this._dbconnection
-          );
-        res.send(products);
-      }
-    );
-
-    /**
-     * @swagger
-     * /products/:id/images/:imageId:
-     *   put:
-     *     summary: Atualiza uma imagem dentro de um produto
-     *     tags:
-     *       - ProductsImages
-     *     parameters:
-     *       - in: path
-     *         name: id
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: id do produto a ser localizado a imagem
-     *       - in: path
-     *         name: imageId
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: id da imagem a ser atualizada dentro do produto
-     *     requestBody:
-     *       required: true
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             properties:
-     *               name:
-     *                 type: string
-     *               size:
-     *                 type: number
-     *               type:
-     *                 type: string
-     *               base64:
-     *                 type: string
-     *     responses:
-     *       200:
-     *         description: Successful response
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 data:
-     *                   type: object
-     *                   properties:
-     *                     _id:
-     *                       type: string
-     *                     _name:
-     *                       type: string
-     *                     _price:
-     *                       type: number
-     *                     _category:
-     *                       type: string
-     *                       enum: [ACCOMPANIMENT, DESSERT, DRINK, SNACK]
-     *                     _description:
-     *                       type: string
-     *       404:
-     *         description: Products not found
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 message:
-     *                   type: string
-     */
-    this._app.put(
-      '/products/:id/images/:imageId',
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      async (req: Request, res: Response) => {
-        res.setHeader('Content-type', 'application/json');
-        const { id, imageId } = req.params;
-        const { name, size, type, base64 } = req.body;
-
-        const products = await ProductsImagesController.updateProductImage(
-          imageId,
-          id,
-          name,
-          size,
-          type,
-          base64,
-          this._dbconnection
-        );
-        res.send(products);
-      }
-    );
-
-    /**
-     * @swagger
-     * /products/:id/images/:imageId:
-     *   delete:
-     *     summary: Remove uma imagem dentro de produto especifico
-     *     tags:
-     *       - ProductsImages
-     *     parameters:
-     *       - in: path
-     *         name: id
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: id do produto a ser localizado
-     *       - in: path
-     *         name: imageId
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: id da imagem a ser removida dentro do produto
-     *     responses:
-     *       200:
-     *         description: Successful response
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 data:
-     *                   type: string
-     *       404:
-     *         description: Products not found
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 message:
-     *                   type: string
-     */
-    this._app.delete(
-      '/products/:id/images/:imageId',
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      async (req: Request, res: Response) => {
-        res.setHeader('Content-type', 'application/json');
-        const { imageId } = req.params;
-
-        const products =
-          await ProductsImagesController.removeProductsImagesById(
-            imageId,
-            this._dbconnection
-          );
-        res.send(products);
-      }
-    );
-  }
-
-  routesCustomers (): void {
-    /**
-     * @swagger
-     * /customers:
-     *   get:
-     *     summary: Retorna a listagem de clientes cadastrados
-     *     tags:
-     *       - Customers
-     *     parameters:
-     *       - name: cpf
-     *         in: query
-     *         description: cpf (opcional)
-     *         required: false
-     *         schema:
-     *           type: string
-     *     responses:
-     *       200:
-     *         description: Successful response
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 data:
-     *                   type: array
-     *                   items:
-     *                     type: object
-     *                     properties:
-     *                       _id:
-     *                         type: string
-     *                       _name:
-     *                         type: string
-     *                       _mail:
-     *                         type: string
-     *                       _cpf:
-     *                         type: number
-     *                       _birthdate:
-     *                         type: date
-     *                       _subscription:
-     *                         type: string
-     *       404:
-     *         description: Products not found
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 message:
-     *                   type: string
-     */
-    this._app.get('/customers', async (req: Request, res: Response) => {
-      res.setHeader('Content-type', 'application/json');
-      const { cpf } = req.query;
-      const products = await CustomersController.getCustomers(
-        cpf,
-        this._dbconnection
-      );
-      res.send(products);
-    });
-
-    /**
-     * @swagger
-     * /customers/:id:
-     *   get:
-     *     summary: Retorna um cliente cadastrados
-     *     tags:
-     *       - Customers
-     *     parameters:
-     *       - in: path
-     *         name: id
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: id do cliente a ser localizado
-     *     responses:
-     *       200:
-     *         description: Successful response
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 data:
-     *                   type: object
-     *                   properties:
-     *                     _id:
-     *                       type: string
-     *                     _name:
-     *                       type: string
-     *                     _mail:
-     *                       type: string
-     *                     _cpf:
-     *                       type: number
-     *                     _birthdate:
-     *                       type: date
-     *                     _subscription:
-     *                       type: string
-     *       404:
-     *         description: Products not found
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 message:
-     *                   type: string
-     */
-    this._app.get('/customers/:id', async (req: Request, res: Response) => {
-      res.setHeader('Content-type', 'application/json');
-      const { id } = req.params;
-
-      const products = await CustomersController.getCustomersById(
-        id,
-        this._dbconnection
-      );
-      res.send(products);
-    });
-
-    /**
-     * @swagger
-     * /customers:
-     *   post:
-     *     summary: Cadastra um novo cliente
-     *     tags:
-     *       - Customers
-     *     requestBody:
-     *       required: true
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             properties:
-     *               name:
-     *                 type: string
-     *               mail:
-     *                 type: string
-     *               cpf:
-     *                 type: number
-     *               birthdate:
-     *                 type: date
-     *               subscription:
-     *                 type: string
-     *     responses:
-     *       200:
-     *         description: Successful response
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 data:
-     *                   type: object
-     *                   properties:
-     *                     _id:
-     *                       type: string
-     *                     _name:
-     *                       type: string
-     *                     _mail:
-     *                       type: string
-     *                     _cpf:
-     *                       type: number
-     *                     _birthdate:
-     *                       type: date
-     *                     _subscription:
-     *                       type: string
-     *       404:
-     *         description: Products not found
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 message:
-     *                   type: string
-     */
-    this._app.post('/customers', async (req: Request, res: Response) => {
-      res.setHeader('Content-type', 'application/json');
-      const { name, mail, cpf, birthdate, subscription } = req.body;
-
-      const products = await CustomersController.setCustomer(
-        name,
-        mail,
-        cpf,
-        birthdate,
-        subscription,
-        this._dbconnection
-      );
-      res.send(products);
-    });
-
-    /**
-     * @swagger
-     * /customers/:id:
-     *   put:
-     *     summary: Atualiza um cliente especifico
-     *     tags:
-     *       - Customers
-     *     parameters:
-     *       - in: path
-     *         name: id
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: id do cliente a ser atualizado
-     *     requestBody:
-     *       required: true
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             properties:
-     *               name:
-     *                 type: string
-     *               mail:
-     *                 type: string
-     *               cpf:
-     *                 type: number
-     *               birthdate:
-     *                 type: date
-     *               subscription:
-     *                 type: string
-     *     responses:
-     *       200:
-     *         description: Successful response
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 data:
-     *                   type: object
-     *                   properties:
-     *                     _id:
-     *                       type: string
-     *                     _name:
-     *                       type: string
-     *                     _mail:
-     *                       type: string
-     *                     _cpf:
-     *                       type: number
-     *                     _birthdate:
-     *                       type: date
-     *                     _subscription:
-     *                       type: string
-     *       404:
-     *         description: Products not found
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 message:
-     *                   type: string
-     */
-    this._app.put('/customers/:id', async (req: Request, res: Response) => {
-      res.setHeader('Content-type', 'application/json');
-      const { id } = req.params;
-      const { name, mail, cpf, birthdate, subscription } = req.body;
-
-      const products = await CustomersController.updateCustomer(
-        id,
-        name,
-        mail,
-        cpf,
-        birthdate,
-        subscription,
-        this._dbconnection
-      );
-      res.send(products);
-    });
-
-    /**
-     * @swagger
-     * /customers/:id:
-     *   delete:
-     *     summary: Remove um cliente especifico
-     *     tags:
-     *       - Customers
-     *     parameters:
-     *       - in: path
-     *         name: id
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: id do cliente a ser removido
-     *     responses:
-     *       200:
-     *         description: Successful response
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 data:
-     *                   type: string
-     *       404:
-     *         description: Products not found
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                 message:
-     *                   type: string
-     */
-    this._app.delete('/customers/:id', async (req: Request, res: Response) => {
-      res.setHeader('Content-type', 'application/json');
-      const { id } = req.params;
-
-      const products = await CustomersController.removeCustomersById(
-        id,
-        this._dbconnection
-      );
-      res.send(products);
-    });
-  }
-
-  routesOrders (): void {
     /**
      * @swagger
      * /orders:
@@ -1216,7 +461,7 @@ export class FastfoodApp {
      *                 message:
      *                   type: string
      */
-    this._app.post('/orders', async (req: Request, res: Response) => {
+    this._app.post('/orders', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { customerId, orderItens } = req.body;
 
@@ -1226,7 +471,7 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.send(order);
-    });
+    }) as RequestHandler);
 
     /**
      * @swagger
@@ -1308,7 +553,7 @@ export class FastfoodApp {
      *                 message:
      *                   type: string
      */
-    this._app.get('/orders/open', async (req: Request, res: Response) => {
+    this._app.get('/orders/open', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { status } = req.params;
 
@@ -1317,7 +562,7 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.send(products);
-    });
+    }) as RequestHandler);
 
     /**
      * @swagger
@@ -1389,7 +634,7 @@ export class FastfoodApp {
      */
     this._app.get(
       '/orders/status/:status',
-      async (req: Request, res: Response) => {
+      (async (req: Request, res: Response): Promise<void> => {
         res.setHeader('Content-type', 'application/json');
         const { status } = req.params;
 
@@ -1399,7 +644,7 @@ export class FastfoodApp {
         );
         res.send(products);
       }
-    );
+      ) as RequestHandler);
 
     /**
      * @swagger
@@ -1459,7 +704,7 @@ export class FastfoodApp {
      *                 message:
      *                   type: string
      */
-    this._app.put('/orders/:id', async (req: Request, res: Response) => {
+    this._app.put('/orders/:id', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { id } = req.params;
       const { status, payment } = req.body;
@@ -1472,7 +717,7 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.send(products);
-    });
+    }) as RequestHandler);
 
     /**
      * @swagger
@@ -1534,7 +779,7 @@ export class FastfoodApp {
      */
     this._app.put(
       '/orders/:id/payment',
-      async (req: Request, res: Response) => {
+      (async (req: Request, res: Response): Promise<void> => {
         res.setHeader('Content-type', 'application/json');
         const { id } = req.params;
         const { payment } = req.body;
@@ -1546,7 +791,7 @@ export class FastfoodApp {
         );
         res.send(products);
       }
-    );
+      ) as RequestHandler);
 
     /**
      * @swagger
@@ -1612,7 +857,7 @@ export class FastfoodApp {
      *                 message:
      *                   type: string
      */
-    this._app.get('/orders/:id', async (req: Request, res: Response) => {
+    this._app.get('/orders/:id', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { id } = req.params;
 
@@ -1621,7 +866,7 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.send(products);
-    });
+    }) as RequestHandler);
 
     /**
      * @swagger
@@ -1661,7 +906,7 @@ export class FastfoodApp {
      *                 message:
      *                   type: string
      */
-    this._app.delete('/orders/:id', async (req: Request, res: Response) => {
+    this._app.delete('/orders/:id', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { id } = req.params;
 
@@ -1670,6 +915,733 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.send(products);
+    }) as RequestHandler);
+
+    /**
+     * @swagger
+     * /products/:id/images:
+     *   get:
+     *     summary: Retorna as imagens de um produto cadastrado
+     *     tags:
+     *       - ProductsImages
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: id do produto a ser localizado as imagesns
+     *     responses:
+     *       200:
+     *         description: Successful response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 data:
+     *                   type: array
+     *                   items:
+     *                     type: object
+     *                     properties:
+     *                       _id:
+     *                         type: string
+     *                       _productId:
+     *                         type: string
+     *                       _name:
+     *                         type: string
+     *                       _size:
+     *                         type: number
+     *                       _type:
+     *                         type: string
+     *                       _base64:
+     *                         type: string
+     *       404:
+     *         description: Products not found
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 message:
+     *                   type: string
+     */
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    this._app.get(
+      '/products/:id/images',
+      (async (req: Request, res: Response): Promise<void> => {
+        res.setHeader('Content-type', 'application/json');
+        const { id } = req.params;
+
+        const products =
+          await ProductsImagesController.getProductsImagesByProductId(
+            {
+              productId: id
+            },
+            this._dbconnection
+          );
+        res.send(products);
+      }
+      ) as RequestHandler);
+
+    /**
+     * @swagger
+     * /products/:id/images:
+     *   post:
+     *     summary: Cadastra uma imagem dentro de um produto
+     *     tags:
+     *       - ProductsImages
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: id do produto a ser cadastrado a imagem
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               name:
+     *                 type: string
+     *               size:
+     *                 type: number
+     *               type:
+     *                 type: string
+     *               base64:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Successful response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     _id:
+     *                       type: string
+     *                     _name:
+     *                       type: string
+     *                     _price:
+     *                       type: number
+     *                     _category:
+     *                       type: string
+     *                       enum: [ACCOMPANIMENT, DESSERT, DRINK, SNACK]
+     *                     _description:
+     *                       type: string
+     *       404:
+     *         description: Products not found
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 message:
+     *                   type: string
+     */
+    this._app.post(
+      '/products/:id/images',
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      (async (req: Request, res: Response): Promise<void> => {
+        res.setHeader('Content-type', 'application/json');
+        const { id } = req.params;
+        const { name, size, type, base64 } = req.body;
+
+        const products = await ProductsImagesController.setProductImage(
+          id,
+          name,
+          size,
+          type,
+          base64,
+          this._dbconnection
+        );
+        res.send(products);
+      }
+      ) as RequestHandler);
+
+    /**
+     * @swagger
+     * /products/:id/images/:imageId:
+     *   get:
+     *     summary: Retorna uma imagen especifica de um produto cadastrado
+     *     tags:
+     *       - ProductsImages
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: id do produto a ser localizado a imagem
+     *       - in: path
+     *         name: imageId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: id da imagem a ser localizada dentro do produto
+     *     responses:
+     *       200:
+     *         description: Successful response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 data:
+     *                   type: array
+     *                   items:
+     *                     type: object
+     *                     properties:
+     *                       _id:
+     *                         type: string
+     *                       _productId:
+     *                         type: string
+     *                       _name:
+     *                         type: string
+     *                       _size:
+     *                         type: number
+     *                       _type:
+     *                         type: string
+     *                       _base64:
+     *                         type: string
+     *       404:
+     *         description: Products not found
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 message:
+     *                   type: string
+     */
+    this._app.get(
+      '/products/:id/images/:imageId',
+      (async (req: Request, res: Response): Promise<void> => {
+        res.setHeader('Content-type', 'application/json');
+        const { id, imageId } = req.params;
+
+        const products =
+          await ProductsImagesController.getProductsImagesByProductId(
+            {
+              _id: imageId,
+              productId: id
+            },
+            this._dbconnection
+          );
+        res.send(products);
+      }
+      ) as RequestHandler);
+
+    /**
+     * @swagger
+     * /products/:id/images/:imageId:
+     *   put:
+     *     summary: Atualiza uma imagem dentro de um produto
+     *     tags:
+     *       - ProductsImages
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: id do produto a ser localizado a imagem
+     *       - in: path
+     *         name: imageId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: id da imagem a ser atualizada dentro do produto
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               name:
+     *                 type: string
+     *               size:
+     *                 type: number
+     *               type:
+     *                 type: string
+     *               base64:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Successful response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     _id:
+     *                       type: string
+     *                     _name:
+     *                       type: string
+     *                     _price:
+     *                       type: number
+     *                     _category:
+     *                       type: string
+     *                       enum: [ACCOMPANIMENT, DESSERT, DRINK, SNACK]
+     *                     _description:
+     *                       type: string
+     *       404:
+     *         description: Products not found
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 message:
+     *                   type: string
+     */
+    this._app.put(
+      '/products/:id/images/:imageId',
+      (async (req: Request, res: Response): Promise<void> => {
+        res.setHeader('Content-type', 'application/json');
+        const { id, imageId } = req.params;
+        const { name, size, type, base64 } = req.body;
+
+        const products = await ProductsImagesController.updateProductImage(
+          imageId,
+          id,
+          name,
+          size,
+          type,
+          base64,
+          this._dbconnection
+        );
+        res.send(products);
+      }
+      ) as RequestHandler);
+
+    /**
+     * @swagger
+     * /products/:id/images/:imageId:
+     *   delete:
+     *     summary: Remove uma imagem dentro de produto especifico
+     *     tags:
+     *       - ProductsImages
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: id do produto a ser localizado
+     *       - in: path
+     *         name: imageId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: id da imagem a ser removida dentro do produto
+     *     responses:
+     *       200:
+     *         description: Successful response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 data:
+     *                   type: string
+     *       404:
+     *         description: Products not found
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 message:
+     *                   type: string
+     */
+    this._app.delete(
+      '/products/:id/images/:imageId',
+      (async (req: Request, res: Response): Promise<void> => {
+        res.setHeader('Content-type', 'application/json');
+        const { imageId } = req.params;
+
+        const products =
+          await ProductsImagesController.removeProductsImagesById(
+            imageId,
+            this._dbconnection
+          );
+        res.send(products);
+      }
+      ) as RequestHandler);
+
+    /**
+     * @swagger
+     * /customers:
+     *   get:
+     *     summary: Retorna a listagem de clientes cadastrados
+     *     tags:
+     *       - Customers
+     *     parameters:
+     *       - name: cpf
+     *         in: query
+     *         description: cpf (opcional)
+     *         required: false
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Successful response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 data:
+     *                   type: array
+     *                   items:
+     *                     type: object
+     *                     properties:
+     *                       _id:
+     *                         type: string
+     *                       _name:
+     *                         type: string
+     *                       _mail:
+     *                         type: string
+     *                       _cpf:
+     *                         type: number
+     *                       _birthdate:
+     *                         type: date
+     *                       _subscription:
+     *                         type: string
+     *       404:
+     *         description: Products not found
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 message:
+     *                   type: string
+     */
+    this._app.get('/customers', (async (req: Request, res: Response): Promise<void> => {
+      res.setHeader('Content-type', 'application/json');
+      const { cpf } = req.query;
+      const products = await CustomersController.getCustomers(
+        cpf,
+        this._dbconnection
+      );
+      res.send(products);
+    }) as RequestHandler);
+
+    /**
+     * @swagger
+     * /customers/:id:
+     *   get:
+     *     summary: Retorna um cliente cadastrados
+     *     tags:
+     *       - Customers
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: id do cliente a ser localizado
+     *     responses:
+     *       200:
+     *         description: Successful response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     _id:
+     *                       type: string
+     *                     _name:
+     *                       type: string
+     *                     _mail:
+     *                       type: string
+     *                     _cpf:
+     *                       type: number
+     *                     _birthdate:
+     *                       type: date
+     *                     _subscription:
+     *                       type: string
+     *       404:
+     *         description: Products not found
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 message:
+     *                   type: string
+     */
+    this._app.get('/customers/:id', (async (req: Request, res: Response): Promise<void> => {
+      res.setHeader('Content-type', 'application/json');
+      const { id } = req.params;
+
+      const products = await CustomersController.getCustomersById(
+        id,
+        this._dbconnection
+      );
+      res.send(products);
+    }) as RequestHandler);
+
+    /**
+     * @swagger
+     * /customers:
+     *   post:
+     *     summary: Cadastra um novo cliente
+     *     tags:
+     *       - Customers
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               name:
+     *                 type: string
+     *               mail:
+     *                 type: string
+     *               cpf:
+     *                 type: number
+     *               birthdate:
+     *                 type: date
+     *               subscription:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Successful response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     _id:
+     *                       type: string
+     *                     _name:
+     *                       type: string
+     *                     _mail:
+     *                       type: string
+     *                     _cpf:
+     *                       type: number
+     *                     _birthdate:
+     *                       type: date
+     *                     _subscription:
+     *                       type: string
+     *       404:
+     *         description: Products not found
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 message:
+     *                   type: string
+     */
+    this._app.post('/customers', (async (req: Request, res: Response): Promise<void> => {
+      res.setHeader('Content-type', 'application/json');
+      const { name, mail, cpf, birthdate, subscription } = req.body;
+
+      const products = await CustomersController.setCustomer(
+        name,
+        mail,
+        cpf,
+        birthdate,
+        subscription,
+        this._dbconnection
+      );
+      res.send(products);
+    }) as RequestHandler);
+
+    /**
+     * @swagger
+     * /customers/:id:
+     *   put:
+     *     summary: Atualiza um cliente especifico
+     *     tags:
+     *       - Customers
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: id do cliente a ser atualizado
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               name:
+     *                 type: string
+     *               mail:
+     *                 type: string
+     *               cpf:
+     *                 type: number
+     *               birthdate:
+     *                 type: date
+     *               subscription:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Successful response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     _id:
+     *                       type: string
+     *                     _name:
+     *                       type: string
+     *                     _mail:
+     *                       type: string
+     *                     _cpf:
+     *                       type: number
+     *                     _birthdate:
+     *                       type: date
+     *                     _subscription:
+     *                       type: string
+     *       404:
+     *         description: Products not found
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 message:
+     *                   type: string
+     */
+    this._app.put('/customers/:id', (async (req: Request, res: Response): Promise<void> => {
+      res.setHeader('Content-type', 'application/json');
+      const { id } = req.params;
+      const { name, mail, cpf, birthdate, subscription } = req.body;
+
+      const products = await CustomersController.updateCustomer(
+        id,
+        name,
+        mail,
+        cpf,
+        birthdate,
+        subscription,
+        this._dbconnection
+      );
+      res.send(products);
+    }) as RequestHandler);
+
+    /**
+     * @swagger
+     * /customers/:id:
+     *   delete:
+     *     summary: Remove um cliente especifico
+     *     tags:
+     *       - Customers
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: id do cliente a ser removido
+     *     responses:
+     *       200:
+     *         description: Successful response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 data:
+     *                   type: string
+     *       404:
+     *         description: Products not found
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 message:
+     *                   type: string
+     */
+    this._app.delete('/customers/:id', (async (req: Request, res: Response): Promise<void> => {
+      res.setHeader('Content-type', 'application/json');
+      const { id } = req.params;
+
+      const products = await CustomersController.removeCustomersById(
+        id,
+        this._dbconnection
+      );
+      res.send(products);
+    }) as RequestHandler);
+
+    this.server = this._app.listen(port, () => {
     });
+    this.server.keepAliveTimeout = 30 * 1000;
+    this.server.headersTimeout = 35 * 1000;
+  }
+
+  stop (): void {
+    this.server.close();
   }
 }
