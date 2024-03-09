@@ -107,7 +107,6 @@ class OrdersItensUseCases {
     id: string,
     ordersItensGateway: OrdersItensGatewayInterface
   ): Promise<any> {
-    console.log(id);
     try {
       await ordersItensGateway.removeFind({
         orderId: id

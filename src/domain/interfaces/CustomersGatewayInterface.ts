@@ -10,6 +10,7 @@ interface CustomersGatewayInterface {
     mail: string,
     cpf: string,
     birthdate: Date,
+    phone: string,
     subscription: string
   ) => Promise<any>
   update: (
@@ -18,6 +19,7 @@ interface CustomersGatewayInterface {
     mail: string,
     cpf: string,
     birthdate: Date,
+    phone: string,
     subscription: string
   ) => Promise<any>
   isValidId: (id: string) => Promise<boolean>

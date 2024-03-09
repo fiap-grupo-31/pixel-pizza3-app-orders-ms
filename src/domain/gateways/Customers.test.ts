@@ -25,6 +25,7 @@ describe('CustomersGateway', () => {
       mail: 'john@example.com',
       cpf: '33811205811',
       birthdate: '1990-01-01',
+      phone: '5511988398795',
       subscription: 'premium',
       created_at: new Date(),
       updated_at: new Date()
@@ -46,6 +47,7 @@ describe('CustomersGateway', () => {
       mail: 'john@example.com',
       cpf: '33811205811',
       birthdate: '1990-01-01',
+      phone: '5511988398795',
       subscription: 'premium',
       created_at: new Date(),
       updated_at: new Date()
@@ -96,6 +98,7 @@ describe('CustomersGateway', () => {
       mail: 'john@example.com',
       cpf: '33811205811',
       birthdate: '1990-01-01',
+      phone: '5511988398795',
       subscription: 'premium',
       created_at: new Date(),
       updated_at: new Date()

@@ -1,9 +1,10 @@
 ![Static Badge](https://img.shields.io/badge/v11-version?logo=typescript&color=%234169E1&labelColor=white&label=Typescript)
 ![Static Badge](https://img.shields.io/badge/v18-version?logo=node.js&color=%234169E1&labelColor=white&label=Nojes)
 ![Static Badge](https://img.shields.io/badge/v18-version?logo=mongodb&color=%234169E1&labelColor=white&label=Mongodb)
-![Static Badge](https://img.shields.io/badge/v11-version?logo=ubuntu&color=%234169E1&labelColor=white&label=Ubuntu) ![Static Badge](https://img.shields.io/badge/v20-version?logo=docker&color=%234169E1&labelColor=white&label=Docker) ![Static Badge](https://img.shields.io/badge/v1.29.2-version?logo=dockercompose&color=%234169E1&labelColor=white&label=DockerCompose) ![Static Badge](https://img.shields.io/badge/vOAS3-version?logo=swagger&color=%234169E1&labelColor=white&label=Swagger)
+![Static Badge](https://img.shields.io/badge/v11-version?logo=ubuntu&color=%234169E1&labelColor=white&label=Ubuntu) ![Static Badge](https://img.shields.io/badge/v20-version?logo=docker&color=%234169E1&labelColor=white&label=Docker) ![Static Badge](https://img.shields.io/badge/v1.29.2-version?logo=dockercompose&color=%234169E1&labelColor=white&label=DockerCompose) ![Static Badge](https://img.shields.io/badge/vOAS3-version?logo=swagger&color=%234169E1&labelColor=white&label=Swagger)[![RabbitMQ Version](https://img.shields.io/badge/RabbitMQ-v1.29.2-blue?logo=rabbitmq)](https://www.rabbitmq.com/)
 
-# Tech Challenge - Fase 04 (GRUPO 31) - Sistema de gestão de pedidos - Microserviço de Clientes, Produtos e Pedidos
+
+# Tech Challenge - Fase 05 (GRUPO 31) - Sistema de gestão de pedidos - Microserviço de Clientes, Produtos e Pedidos + Padrão SAGA + LGPD
 
 Consiste no microserviço de um sistema de gestão de pedidos para processamento de clientes, produtos e "pedidos" incluindo as seguintes caracteristicas:
 
@@ -28,7 +29,101 @@ Para uma visualização completa em PDF é possivel visualizar no documento abai
 - Enpoints's para consulta de pedido por id, por status do pedido
 - Enpoints para remoção de pedido por id
 - Enpoints para atualização de status de pedido (para receber o status do andamento do pedido que vem do microserviço de "preparação do pedido")
+- Enpoint para solicitação de exclusão de daados (LGPD)
 - Pipeline GitActions Workflow para execução de testes e build da imagem em ECR AWS
+
+## Padrão Saga
+O padrão de saga coreografado foi selecionado como a abordagem ideal para a comunicação entre os microsserviços envolvidos no processamento de pedidos por diversas razões fundamentais que se alinham com os requisitos e princípios da arquitetura de microsserviços criada em nosso projeto:
+
+- Autonomia e Desacoplamento:
+No padrão de saga coreografado, cada microsserviço é autônomo em sua execução e responsabilidade. Isso significa que cada serviço é capaz de tomar decisões e agir de forma independente em resposta aos eventos que ocorrem dentro do sistema. Essa autonomia promove um alto nível de desacoplamento entre os serviços, permitindo que eles evoluam de forma independente e sejam mais facilmente escaláveis.
+
+- Flexibilidade e Resiliência:
+O padrão de saga coreografado oferece uma flexibilidade excepcional para lidar com cenários complexos e imprevisíveis. Cada microsserviço é capaz de adaptar seu comportamento em tempo real com base nos eventos que ocorrem no sistema. Isso permite que o sistema se recupere de falhas e exceções de forma mais eficaz, garantindo uma maior resiliência e robustez.
+
+- Escalabilidade Horizontal:
+A abordagem coreografada permite uma escalabilidade horizontal eficiente, pois cada microsserviço pode ser escalado independentemente com base em suas próprias demandas de carga de trabalho. Isso possibilita a distribuição do processamento e a utilização eficiente dos recursos disponíveis, garantindo um desempenho otimizado em todo o sistema.
+
+- Dinâmica de Comunicação:
+No padrão de saga coreografado, a comunicação entre os microsserviços é baseada em eventos assíncronos e troca de mensagens. Isso permite uma dinâmica de comunicação fluida e adaptável, onde os serviços podem colaborar e coordenar suas atividades de forma eficiente, mesmo em um ambiente distribuído e altamente escalável.
+
+- Baixa Complexidade de Orquestração:
+Ao contrário do padrão de saga orquestrado, onde existe um componente centralizado responsável por coordenar e controlar o fluxo de execução, o padrão de saga coreografado possui uma complexidade de orquestração significativamente menor. Cada microsserviço é responsável por coordenar suas próprias atividades em resposta aos eventos que ocorrem no sistema, reduzindo assim a sobrecarga e o ponto único de falha.
+
+#### Baseado nessas considerações, o padrão de saga coreografado foi escolhido como a abordagem mais adequada para a comunicação entre os microsserviços envolvidos no processamento de pedidos. Sua flexibilidade, autonomia e capacidade de lidar com cenários complexos garantem um sistema altamente resiliente, escalável e adaptável às demandas em constante evolução do negócio, bem como a não necessidade de criar um novo microserviço desacoplado com banco de dados isolado para orquestrar todo o processo.
+
+
+### Criação de Pedido e Pedido de pagamento Modelo coreografado, saga executado com sucesso
+```mermaid
+sequenceDiagram
+loop Criação de pedido
+    Cliente->>MICROSERVICE_ORDERS: Pedido realizado via API para Microserviço Orders
+    MICROSERVICE_ORDERS->>MongoDb: Persiste em database
+    MICROSERVICE_ORDERS->>RabbitMq: Queue Pedido de Pagamento
+	RabbitMq->>MICROSERVICE_PAYMENT: Efetua pedido de pagamento
+    MICROSERVICE_PAYMENT->>Mysql: Persiste em database
+    MICROSERVICE_PAYMENT->>RabbitMq: Envia SUCCESS Sucesso no pedido pagamento
+    RabbitMq->>MICROSERVICE_ORDERS: Microserviço e Orders processa retorno
+    MICROSERVICE_ORDERS->>MongoDb: Persiste em database
+    MICROSERVICE_ORDERS-->>Whatsapp: Notifica Cliente
+    MICROSERVICE_ORDERS->>RabbitMq: Queue Produção de pedido (Cozinha)
+    RabbitMq->>MICROSERVICE_PRODUCTION: Cria pedido na cozinha para produção
+    MICROSERVICE_PRODUCTION->>Mysql: Persiste em database
+    MICROSERVICE_PRODUCTION->>RabbitMq: Envia SUCCESS Sucesso para pedidos atualizar andamento
+    RabbitMq->>MICROSERVICE_ORDERS: Microserviço e Orders processa retorno
+    MICROSERVICE_ORDERS->>MongoDb: Persiste em database
+    MICROSERVICE_ORDERS-->>Whatsapp: Notifica Cliente do andamento
+end
+
+```
+
+### Criação de Pedido e Pedido de pagamento Modelo coreografado, saga entrando em ação compensatória por falha no pedido de pagamento
+```mermaid
+sequenceDiagram
+loop Criação de pedido
+    Cliente->>MICROSERVICE_ORDERS: Pedido realizado via API para Microserviço Orders
+    MICROSERVICE_ORDERS->>MongoDb: Persiste em database
+    MICROSERVICE_ORDERS->>RabbitMq: Queue Pedido de Pagamento
+	RabbitMq->>MICROSERVICE_PAYMENT: Efetua pedido de pagamento
+    MICROSERVICE_PAYMENT->>Mysql: Persiste em database
+    MICROSERVICE_PAYMENT->>RabbitMq: Envia ERROR Falha no pedido pagamento
+    RabbitMq->>MICROSERVICE_ORDERS: Microserviço e Orders processa retorno compensatório
+    MICROSERVICE_ORDERS->>MongoDb: Persiste em database
+    MICROSERVICE_ORDERS-->>Whatsapp: Notifica Cliente
+end
+
+```
+
+### Criação de Pedido e Pedido de pagamento Modelo coreografado, saga entrando em ação compensatória por falha na criação da do pedido na cozinha
+```mermaid
+sequenceDiagram
+loop Criação de pedido
+    Cliente->>MICROSERVICE_ORDERS: Pedido realizado via API para Microserviço Orders
+    MICROSERVICE_ORDERS->>MongoDb: Persiste em database
+    MICROSERVICE_ORDERS->>RabbitMq: Queue Pedido de Pagamento
+	RabbitMq->>MICROSERVICE_PAYMENT: Efetua pedido de pagamento
+    MICROSERVICE_PAYMENT->>Mysql: Persiste em database
+    MICROSERVICE_PAYMENT->>RabbitMq: Envia SUCCESS Sucesso no pedido pagamento
+    RabbitMq->>MICROSERVICE_ORDERS: Microserviço e Orders processa retorno
+    MICROSERVICE_ORDERS->>MongoDb: Persiste em database
+    MICROSERVICE_ORDERS-->>Whatsapp: Notifica Cliente
+    MICROSERVICE_ORDERS->>RabbitMq: Queue Produção de pedido (Cozinha)
+    RabbitMq->>MICROSERVICE_PRODUCTION: Cria pedido na cozinha para produção
+    MICROSERVICE_PRODUCTION->>Mysql: Persiste em database
+    MICROSERVICE_PRODUCTION->>RabbitMq: Envia ERROR Falha para cozinha receber
+    RabbitMq->>MICROSERVICE_ORDERS: Microserviço e Orders processa retorno compensatório
+    MICROSERVICE_ORDERS->>MongoDb: Persiste em database
+    MICROSERVICE_ORDERS-->>Whatsapp: Notifica Cliente do andamento
+    MICROSERVICE_ORDERS->>RabbitMq: Queue Pedido de cancelamento de Pagamento compensatório
+	RabbitMq->>MICROSERVICE_PAYMENT: Efetua pedido de cancelamento pagamento
+    MICROSERVICE_PAYMENT->>Mysql: Persiste em database
+    MICROSERVICE_PAYMENT->>RabbitMq: Envia SUCCESS Sucesso no pedido pagamento
+    RabbitMq->>MICROSERVICE_ORDERS: Microserviço e Orders processa retorno
+    MICROSERVICE_ORDERS->>MongoDb: Persiste em database
+    MICROSERVICE_ORDERS-->>Whatsapp: Notifica Cliente
+end
+
+```
 
 ## Requisitos para execução direta
 
@@ -90,12 +185,13 @@ O swagger é um framework composto por diversas ferramentas que, independente da
 - CLIENTES (customer)
     - permite criar um novo cadastro de cliente
     - permite consultar um cadastro pelo cpf
-    - permite consultar todos os cadastro ( novo )
-    - permite consultar um cadastro por id ( novo )
-    - permite atualizar um cadastro por id ( novo )
-    - permite remover um cadastro por id ( novo )
+    - permite consultar todos os cadastro
+    - permite consultar um cadastro por id
+    - permite atualizar um cadastro por id
+    - permite remover um cadastro por id
+    - permite remover um dados por cpf ( lgpd )
 - PRODUTOS
-    - permite buscar todos os produtos ( novo )
+    - permite buscar todos os produtos
     - permite buscar produtos por categorias pré definidas 'ACCOMPANIMENT', 'DESSERT', 'DRINK' e 'SNACK'
     - permite buscar produtos por id
     - permite remover produtos por id
@@ -105,10 +201,10 @@ O swagger é um framework composto por diversas ferramentas que, independente da
     - permite criar um novo pedido enviando os produtos seleecionados
     - permite atualizar a situação (status) do pedido
     - permite consultar pedidos por situação (status)
-    - permite atualizar o status de um pedido ( novo )
-    - permite consultar um pedido por id ( novo )
-    - permite remover um pedido por id ( novo )
-    - permite atualizar o status de pagamento de um pedido por id ( novo )
+    - permite atualizar o status de um pedido
+    - permite consultar um pedido por id
+    - permite remover um pedido por id
+    - permite atualizar o status de pagamento de um pedido por id
 
 ## Jornada de teste
 
@@ -248,6 +344,19 @@ curl --location 'http://localhost:8080/customers/64e262c9c949fba1be313182'
 ##### Buscar um cliente por cpf
 ```
 curl --location 'http://localhost:8080/customers?cpf=44445337064'
+```
+
+##### Remover dados sensiveis por cpf (LGPD).
+```
+curl --location 'http://localhost:8080/customers/lgpd' \
+--header 'Content-Type: application/json' \
+--data '{
+    "cpf": "56798813062",
+    "remove_name": true,
+    "remove_phone": true,
+    "remove_mail": true,
+    "remove_all": true
+}'
 ```
 
 #### Criar um pedido ( retorna _protocol_ == numero do pedido e _id chave), retornando o pedido por completo

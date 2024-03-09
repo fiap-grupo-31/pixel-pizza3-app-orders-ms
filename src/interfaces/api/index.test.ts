@@ -17,7 +17,7 @@ describe('FastfoodApp', () => {
   beforeAll(() => {
     mockDbConnection = {};
     process.env.PORT = '9010';
-    fastfoodApp = new FastfoodApp(mockDbConnection);
+    fastfoodApp = new FastfoodApp(mockDbConnection, null);
     fastfoodApp.start();
   });
 

@@ -7,6 +7,8 @@ export class Orders {
   private readonly _amount: number;
   private readonly _status: string;
   private readonly _payment: string;
+  private readonly _paymentReference: string;
+  private readonly _productionReference: string;
   private readonly _orderDescription: string;
   private readonly _created_at: Date;
   private readonly _updated_at: Date;
@@ -19,6 +21,8 @@ export class Orders {
     amount: number,
     status: string,
     payment: string,
+    paymentReference: string,
+    productionReference: string,
     orderDescription: string,
     created_at: any,
     updated_at: any
@@ -30,6 +34,8 @@ export class Orders {
     this._amount = amount;
     this._status = status;
     this._payment = payment;
+    this._paymentReference = paymentReference;
+    this._productionReference = productionReference;
     this._orderDescription = orderDescription;
     this._created_at = created_at;
     this._updated_at = updated_at;
@@ -67,6 +73,14 @@ export class Orders {
     return this._payment;
   }
 
+  get orderPaymentReference (): string {
+    return this._paymentReference;
+  }
+
+  get orderProductionReference (): string {
+    return this._productionReference;
+  }
+
   get orderDescription (): string {
     return this._orderDescription;
   }
@@ -77,7 +91,8 @@ export class Orders {
       'FINISH', // FINALIZADO ( ENTREGUE )
       'IN_PROGRESS', // PREPARANDO
       'RECEIVE', // RECEBIDO NO SISTEMA
-      'CANCELED' // CANCELADO
+      'CANCELED', // CANCELADO
+      'FAIL' // FALHA
     ].includes(this._status);
   }
 
@@ -102,14 +117,14 @@ export class Orders {
   get statusWithPaymentCheck (): boolean {
     if (
       ['WAITING', 'APPROVED', 'NONE'].includes(this._payment) &&
-      ['RECEIVE'].includes(this._status)
+      ['RECEIVE', 'FAIL'].includes(this._status)
     ) {
       return true;
     }
 
     if (
       ['CANCELED', 'DENIED'].includes(this._payment) &&
-      ['CANCELED', 'RECEIVE'].includes(this._status)
+      ['CANCELED', 'RECEIVE', 'FAIL'].includes(this._status)
     ) {
       return true;
     }

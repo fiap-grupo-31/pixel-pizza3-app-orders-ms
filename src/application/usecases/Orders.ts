@@ -1,8 +1,6 @@
 /* eslint-disable prefer-promise-reject-errors */
 import { Orders } from '../../domain/entities/Orders';
 import { type OrdersGatewayInterface } from '../../domain/interfaces/OrdersGatewayInterface';
-import { type PaymentApiAdapter } from '../../interfaces/adapters/PaymentApiAdapter';
-import { type ProductionApiAdapter } from '../../interfaces/adapters/ProductionApiAdapter';
 
 class OrdersUseCases {
   static async getOrdersAll (
@@ -32,7 +30,7 @@ class OrdersUseCases {
     status: string,
     payment: string,
     orderDescription: string,
-    paymentApiAdapter: PaymentApiAdapter,
+    _rabbitMqService: any,
     ordersGateway: OrdersGatewayInterface
   ): Promise<Orders | null> {
     if (customerId) {
@@ -53,6 +51,8 @@ class OrdersUseCases {
       amount,
       status,
       payment,
+      '',
+      '',
       orderDescription,
       null,
       null
@@ -85,17 +85,29 @@ class OrdersUseCases {
         order.amount,
         order.status,
         order.payment,
+        order.paymentReference ?? '',
+        order.productionReference ?? '',
         order?.orderDescription,
         order.created_at,
         order.updated_at
       );
 
-      await paymentApiAdapter.createPayment(
-        order._id ?? '',
-        'fake',
-        order.quantity,
-        order.amount
-      )
+      try {
+        await _rabbitMqService.sendMessage('payments', {
+          event: 'createPayment',
+          orderId: order._id ?? '',
+          mode: 'fake',
+          quantity: order.quantity,
+          amount: order.amount
+        })
+
+        await _rabbitMqService.sendMessage('orders', {
+          event: 'sendNotify',
+          customerId: order.customerId,
+          message: 'Pedido realizado: *Aguardando pagamento*'
+        })
+      } catch (error) {
+      }
 
       return orders;
     } catch (error) {
@@ -111,21 +123,24 @@ class OrdersUseCases {
     amount: number,
     status: string,
     payment: string,
+    paymentReference: string,
+    productionReference: string,
     orderDescription: string,
-    productionApiAdapter: ProductionApiAdapter,
+    _rabbitMqService: any,
     ordersGateway: OrdersGatewayInterface
   ): Promise<Orders | null> {
-    if (!status) {
-      throw new Error('status inválid');
-    }
-
     if (['DENIED', 'CANCELED'].includes(payment)) {
-      status = 'CANCELED';
+      status = (status === 'FAIL' ? status : 'CANCELED');
       payment = 'CANCELED';
     }
 
     if (['CANCELED'].includes(status)) {
       status = 'CANCELED';
+      payment = 'CANCELED';
+    }
+
+    if (['FAIL'].includes(status)) {
+      status = 'FAIL';
       payment = 'CANCELED';
     }
 
@@ -137,6 +152,8 @@ class OrdersUseCases {
       amount,
       status,
       payment,
+      paymentReference,
+      productionReference,
       orderDescription,
       null,
       null
@@ -160,15 +177,72 @@ class OrdersUseCases {
         amount,
         status,
         payment,
+        paymentReference,
+        productionReference,
         orderDescription
       );
 
-      if (status === 'RECEIVE' && payment === 'APPROVED') {
-        await productionApiAdapter.createProduction(
-          id,
-          protocol,
-          orderDescription
-        )
+      try {
+        if (status === 'RECEIVE' && payment === 'APPROVED' && ((productionReference ?? '') === '')) {
+          await _rabbitMqService.sendMessage('orders', {
+            event: 'sendNotify',
+            customerId: order.customerId,
+            message: `Pedido ${protocol}: Pagamento aprovado`
+          })
+
+          // ENVIA PARA PRODUÇÃO APOS PAGAMENTO APROVADO
+          await _rabbitMqService.sendMessage('productions', {
+            event: 'createProduction',
+            id,
+            protocol,
+            orderDescription,
+            status: 'WAITING'
+          })
+        } else if (status === 'FAIL') {
+          await _rabbitMqService.sendMessage('orders', {
+            event: 'sendNotify',
+            customerId: order.customerId,
+            message: `Pedido ${protocol}: ` + (payment === 'DENIED' ? 'Pagamento rejeitado' : 'Houve uma falha')
+          })
+
+          await _rabbitMqService.sendMessage('payments', {
+            event: 'rejectPayment',
+            orderId: id,
+            status: 'CANCELED'
+          })
+        }
+
+        if (payment === 'DENIED' || payment === 'CANCELED') {
+          await _rabbitMqService.sendMessage('orders', {
+            event: 'sendNotify',
+            customerId: order.customerId,
+            message: `Pedido ${protocol}: Pagamento rejeitado`
+          })
+        }
+
+        if (status === 'IN_PROGRESS') {
+          await _rabbitMqService.sendMessage('orders', {
+            event: 'sendNotify',
+            customerId: order.customerId,
+            message: `Pedido ${protocol}: Em preparação`
+          })
+        }
+        if (status === 'FINISH') {
+          await _rabbitMqService.sendMessage('orders', {
+            event: 'sendNotify',
+            customerId: order.customerId,
+            message: `Pedido ${protocol}: Pedido pronto, favor retirar`
+          })
+        }
+        if (status === 'DONE') {
+          await _rabbitMqService.sendMessage('orders', {
+            event: 'sendNotify',
+            customerId: order.customerId,
+            message: `Pedido ${protocol}: Pedido entregue`
+          })
+        }
+      } catch (error) {
+
       }
 
       return new Orders(
@@ -179,6 +253,8 @@ class OrdersUseCases {
         order.amount,
         order.status,
         order.payment,
+        order.paymentReference ?? '',
+        order.productionReference ?? '',
         order?.orderDescription,
         order.created_at,
         order.updated_at

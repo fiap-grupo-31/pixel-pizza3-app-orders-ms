@@ -5,7 +5,6 @@ import {
   ProductsGateway
 } from '../../domain/gateways';
 
-import { PaymentApiAdapter } from '../adapters/PaymentApiAdapter'
 import { ProductionApiAdapter } from '../adapters/ProductionApiAdapter'
 import { type DbConnection } from '../../domain/interfaces/dbconnection';
 import {
@@ -144,10 +143,13 @@ export class OrdersController {
     dbconnection: DbConnection
   ): Promise<string> {
     const productsImagesGateway = new OrdersGateway(dbconnection);
+    const where = (reference === 'ALL'
+      ? {}
+      : {
+          status: reference
+        })
     const allOrders = await OrdersUseCases.getOrdersByStatus(
-      {
-        status: reference
-      },
+      where,
       productsImagesGateway
     )
       .then((data) => {
@@ -247,7 +249,8 @@ export class OrdersController {
   static async setOrder (
     customerId: string,
     orderItens: any[],
-    dbconnection: DbConnection
+    dbconnection: DbConnection,
+    _rabbitMqService: any
   ): Promise<string> {
     const ordersGateway = new OrdersGateway(dbconnection);
     const status = 'RECEIVE';
@@ -324,7 +327,6 @@ export class OrdersController {
       }
     }
 
-    const paymentApiAdapter = new PaymentApiAdapter(process.env.API_PAYMENT_BASEURL ?? '');
     // cria um pedido
     const order = await OrdersUseCases.setOrders(
       customerId,
@@ -333,7 +335,7 @@ export class OrdersController {
       status,
       payment,
       orderDescription.join('\n'),
-      paymentApiAdapter,
+      _rabbitMqService,
       ordersGateway
     )
       .then((data) => {
@@ -395,6 +397,9 @@ export class OrdersController {
     customer: string | '',
     status: string,
     payment: string | null,
+    paymentReference: string | null,
+    productionReference: string | null,
+    _rabbitMqService: any,
     dbconnection: DbConnection
   ): Promise<string> {
     const ordersGateway = new OrdersGateway(dbconnection);
@@ -407,8 +412,6 @@ export class OrdersController {
         return err;
       });
 
-    const productionApiAdapter = new ProductionApiAdapter(process.env.API_PRODUCTION_BASEURL ?? '');
-
     const order = await OrdersUseCases.updateOrders(
       id,
       customer,
@@ -417,8 +420,10 @@ export class OrdersController {
       orderGet?._amount,
       status,
       payment ?? orderGet?._payment,
+      ((orderGet?._paymentReference ?? '') !== '' ? orderGet?._paymentReference : paymentReference),
+      ((orderGet?._productionReference ?? '') !== '' ? orderGet?._productionReference : productionReference),
       orderGet?._orderDescription,
-      productionApiAdapter,
+      _rabbitMqService,
       ordersGateway
     )
       .then((data) => {
@@ -445,6 +450,8 @@ export class OrdersController {
   static async updatePaymentOrder (
     id: string,
     payment: string,
+    paymentReference: string,
+    productionReference: string,
     dbconnection: DbConnection
   ): Promise<string> {
     const ordersGateway = new OrdersGateway(dbconnection);
@@ -467,6 +474,8 @@ export class OrdersController {
       orderGet?._amount,
       orderGet?._status,
       payment,
+      paymentReference,
+      productionReference,
       orderGet?._orderDescription,
       productionApiAdapter,
       ordersGateway

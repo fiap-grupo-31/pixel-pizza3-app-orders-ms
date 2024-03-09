@@ -5,6 +5,7 @@ export class Customers {
   private readonly _mail: string;
   private readonly _cpf: string;
   private readonly _birthdate: Date;
+  private readonly _phone: string;
   private readonly _subscription: string;
   private readonly _created_at: Date;
   private readonly _updated_at: Date;
@@ -15,6 +16,7 @@ export class Customers {
     mail: string,
     cpf: string,
     birthdate: Date,
+    phone: string,
     subscription: string,
     created_at: any,
     updated_at: any
@@ -27,6 +29,7 @@ export class Customers {
     this._mail = mail;
     this._cpf = cpf.match(/\d+/g)?.toString() ?? '';
     this._birthdate = birthdate ?? new Date();
+    this._phone = phone;
     this._subscription = subscription;
     this._created_at = created_at ?? '';
     this._updated_at = updated_at ?? '';
@@ -50,6 +53,10 @@ export class Customers {
 
   get birthdate (): Date {
     return this._birthdate;
+  }
+
+  get phone (): string {
+    return this._phone;
   }
 
   get subscription (): string {

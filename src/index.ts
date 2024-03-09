@@ -1,5 +1,7 @@
 import { FastfoodApp } from './interfaces/api';
 import { MongodbConnection } from './infrastructure/persistence/databases/mongodb_database';
+import { RabbitMQService } from './infrastructure/external/rabbitmq/rabbitmq';
+
 import * as dotenv from 'dotenv';
 
 dotenv.config({
@@ -11,5 +13,6 @@ console.log('API API_PAYMENT_BASEURL', process.env.API_PAYMENT_BASEURL)
 console.log('API API_PRODUCTION_BASEURL', process.env.API_PRODUCTION_BASEURL)
 const dbconnection = new MongodbConnection(
 );
-const fastfoodApp = new FastfoodApp(dbconnection);
+const rabbitMQService = new RabbitMQService();
+const fastfoodApp = new FastfoodApp(dbconnection, rabbitMQService);
 fastfoodApp.start();

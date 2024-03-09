@@ -12,6 +12,8 @@ describe('Orders', () => {
       50.0,
       'IN_PROGRESS',
       'WAITING',
+      '',
+      '',
       'Order Description',
       new Date('2023-10-12 10:00:00'),
       new Date('2023-10-12 10:00:00')
@@ -84,6 +86,8 @@ describe('Orders', () => {
       'RECEIVE',
       'WAITING',
       'Order Description',
+      '',
+      '',
       new Date('2023-10-12 10:00:00'),
       new Date('2023-10-12 10:00:00')
     );
@@ -100,6 +104,8 @@ describe('Orders', () => {
       'RECEIVE',
       'CANCELED',
       'Order Description',
+      '',
+      '',
       new Date('2023-10-12 10:00:00'),
       new Date('2023-10-12 10:00:00')
     );
@@ -116,6 +122,8 @@ describe('Orders', () => {
       'IN_PROGRESS',
       'APPROVED',
       'Order Description',
+      '',
+      '',
       new Date('2023-10-12 10:00:00'),
       new Date('2023-10-12 10:00:00')
     );
@@ -133,6 +141,8 @@ describe('Orders', () => {
         'TESTE',
         'WAITING',
         'Order Description',
+        '',
+        '',
         new Date('2023-10-12 10:00:00'),
         new Date('2023-10-12 10:00:00')
       );

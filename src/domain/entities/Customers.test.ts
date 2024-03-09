@@ -11,6 +11,7 @@ describe('Customers', () => {
       'john@example.com',
       '04207262091',
       new Date('1990-01-01'),
+      '5511988398795',
       'subscription',
       new Date('2023-10-12 10:00:00'),
       new Date('2023-10-12 10:00:00')
@@ -56,6 +57,7 @@ describe('Customers', () => {
       'john@example.com',
       '04207262091',
       new Date('1990-01-01'),
+      '5511988398795',
       'subscription',
       new Date(),
       new Date()
@@ -72,6 +74,7 @@ describe('Customers', () => {
         'john@example.com',
         '0000',
         new Date('1990-01-01'),
+        '5511988398795',
         'subscription',
         new Date(),
         new Date()
@@ -90,6 +93,7 @@ describe('Customers', () => {
         'john@example.com',
         '',
         new Date('1990-01-01'),
+        '5511988398795',
         'subscription',
         new Date(),
         new Date()
@@ -107,6 +111,7 @@ describe('Customers', () => {
       'john@example.com',
       '04207262091',
       new Date('1990-01-01'),
+      '5511988398795',
       'subscription',
       new Date(),
       new Date()
@@ -122,6 +127,7 @@ describe('Customers', () => {
       'john@example.com',
       '04207262091',
       new Date('1990-01-01'),
+      '5511988398795',
       'subscription',
       new Date('2023-10-12 10:00:00'),
       new Date('2023-10-12 10:00:00')

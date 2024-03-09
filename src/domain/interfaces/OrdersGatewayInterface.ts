@@ -20,6 +20,8 @@ interface OrdersGatewayInterface {
     amount: number,
     status: string,
     payment: string,
+    paymentReference: string,
+    productionReference: string,
     orderDescription: string
   ) => Promise<any>
   isValidId: (id: string) => Promise<boolean>
