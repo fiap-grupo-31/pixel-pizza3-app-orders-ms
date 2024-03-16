@@ -19,12 +19,19 @@ const ordersSchema = new Schema(
         'IN_PROGRESS',
         'RECEIVE',
         'PAID',
-        'CANCELED'
+        'CANCELED',
+        'FAIL'
       ]
     },
     payment: {
       type: String,
       enum: ['NONE', 'WAITING', 'APPROVED', 'DENIED']
+    },
+    paymentReference: {
+      type: String
+    },
+    productionReference: {
+      type: String
     },
     name: String,
     orderDescription: String

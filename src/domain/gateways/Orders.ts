@@ -24,6 +24,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
         result.amount,
         result.status,
         result.payment,
+        result.paymentReference,
+        result.productionReference,
         result?.orderDescription,
         result.created_at,
         result.updated_at
@@ -48,6 +50,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
             element.amount,
             element.status,
             element.payment,
+            element.paymentReference,
+            element.productionReference,
             element?.orderDescription,
             element.created_at,
             element.updated_at
@@ -75,6 +79,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
             element.amount,
             element.status,
             element.payment,
+            element.paymentReference,
+            element.productionReference,
             element?.orderDescription,
             element.created_at,
             element.updated_at
@@ -101,6 +107,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
       quantity,
       status,
       payment,
+      '',
+      '',
       orderDescription,
       null,
       null
@@ -109,6 +117,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
     const objectPersist: any = {
       status: orders.status,
       payment: orders.payment,
+      paymentReference: '',
+      productionReference: '',
       quantity: orders.quantity,
       amount: orders.amount,
       orderDescription: orders.orderDescription
@@ -131,6 +141,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
     amount: number,
     status: string,
     payment: string,
+    paymentReference: string,
+    productionReference: string,
     orderDescription: string
   ): Promise<any> {
     const orders = new Orders(
@@ -141,6 +153,8 @@ export class OrdersGateway implements OrdersGatewayInterface {
       amount,
       status,
       payment,
+      paymentReference,
+      productionReference,
       orderDescription,
       null,
       null
@@ -148,7 +162,9 @@ export class OrdersGateway implements OrdersGatewayInterface {
 
     const objectPersist: any = {
       status: orders.status,
-      payment: orders.payment
+      payment: orders.payment,
+      paymentReference,
+      productionReference
     }
 
     if (orders.customerId !== '') { objectPersist.customerId = orders.customerId; }

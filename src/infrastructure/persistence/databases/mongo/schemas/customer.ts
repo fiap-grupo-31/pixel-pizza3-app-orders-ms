@@ -9,6 +9,7 @@ const customerSchema = new Schema(
       index: true
     },
     birthdate: Date,
+    phone: String,
     subscription: {
       type: String
     }

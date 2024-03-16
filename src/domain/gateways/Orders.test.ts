@@ -110,7 +110,7 @@ describe('OrdersGateway', () => {
 
     const ordersGateway = new OrdersGateway(dbConnectionMock);
 
-    const result = await ordersGateway.update('1', '1', 1, 100, 'RECEIVE', 'APPROVED', 'Teste');
+    const result = await ordersGateway.update('1', '1', 1, 100, 'RECEIVE', 'APPROVED', 'Teste', '', '');
 
     expect(result).toBe(false);
   });

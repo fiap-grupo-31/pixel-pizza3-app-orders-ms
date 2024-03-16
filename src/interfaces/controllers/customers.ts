@@ -84,6 +84,7 @@ export class CustomersController {
     * @param {string} mail
     * @param {string} cpf
     * @param {Date} birthdate
+    * @param {string} phone
     * @param {string} subscription
     * @param {DbConnection} dbconnection
     * @return {*}  {Promise<string>}
@@ -94,6 +95,7 @@ export class CustomersController {
     mail: string,
     cpf: string,
     birthdate: Date,
+    phone: string,
     subscription: string,
     dbconnection: DbConnection
   ): Promise<string> {
@@ -103,6 +105,7 @@ export class CustomersController {
       mail,
       cpf,
       birthdate,
+      phone,
       subscription,
       customersGateway
     )
@@ -126,6 +129,7 @@ export class CustomersController {
     * @param {string} mail
     * @param {string} cpf
     * @param {Date} birthdate
+    * @param {string} phone
     * @param {string} subscription
     * @param {DbConnection} dbconnection
     * @return {*}  {Promise<string>}
@@ -137,6 +141,7 @@ export class CustomersController {
     mail: string,
     cpf: string,
     birthdate: Date,
+    phone: string,
     subscription: string,
     dbconnection: DbConnection
   ): Promise<string> {
@@ -147,6 +152,7 @@ export class CustomersController {
       mail,
       cpf,
       birthdate,
+      phone,
       subscription,
       customersGateway
     )

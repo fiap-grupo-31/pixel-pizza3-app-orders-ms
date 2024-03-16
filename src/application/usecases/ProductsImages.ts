@@ -73,6 +73,7 @@ class ProductsImagesUseCases {
         type,
         base64
       );
+
       return new ProductsImages(
         productImage._id,
         productImage.productId,

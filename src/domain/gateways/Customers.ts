@@ -22,6 +22,7 @@ export class CustomersGateway implements CustomersGatewayInterface {
         result.mail,
         result.cpf,
         result.birthdate,
+        result.phone,
         result.subscription,
         result.created_at,
         result.updated_at
@@ -44,6 +45,7 @@ export class CustomersGateway implements CustomersGatewayInterface {
             element.mail,
             element.cpf,
             element.birthdate,
+            element.phone,
             element.subscription,
             element.created_at,
             element.updated_at
@@ -69,6 +71,7 @@ export class CustomersGateway implements CustomersGatewayInterface {
             element.mail || '',
             element.cpf || '',
             element.birthdate || '',
+            element.phone || '',
             element.subscription || '',
             element.created_at,
             element.updated_at
@@ -84,6 +87,7 @@ export class CustomersGateway implements CustomersGatewayInterface {
     mail: string,
     cpf: string,
     birthdate: Date,
+    phone: string,
     subscription: string
   ): Promise<any> {
     const customer = new Customers(
@@ -92,6 +96,7 @@ export class CustomersGateway implements CustomersGatewayInterface {
       mail,
       cpf,
       birthdate,
+      phone,
       subscription,
       null,
       null
@@ -104,6 +109,7 @@ export class CustomersGateway implements CustomersGatewayInterface {
         mail: customer.mail,
         cpf: customer.cpf,
         birthdate: customer.birthdate,
+        phone: customer.phone,
         subscription: customer.subscription
       }
     );
@@ -117,6 +123,7 @@ export class CustomersGateway implements CustomersGatewayInterface {
     mail: string,
     cpf: string,
     birthdate: Date,
+    phone: string,
     subscription: string
   ): Promise<any> {
     const customer = new Customers(
@@ -125,6 +132,7 @@ export class CustomersGateway implements CustomersGatewayInterface {
       mail,
       cpf,
       birthdate,
+      phone,
       subscription,
       null,
       null
@@ -138,6 +146,7 @@ export class CustomersGateway implements CustomersGatewayInterface {
         mail: customer.mail,
         cpf: customer.cpf,
         birthdate: customer.birthdate,
+        phone: customer.phone,
         subscription: customer.subscription
       }
     );

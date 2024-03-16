@@ -1,11 +1,13 @@
 import { ProductsController } from '../controllers/products';
 import { ProductsImagesController } from '../controllers/productsImages';
+import { OrdersRabbitmqController } from '../controllers/ordersRabbitmq';
 import { CustomersController } from '../controllers/customers';
 import { OrdersController } from '../controllers/orders';
 
 import { type DbConnection } from '../../domain/interfaces/dbconnection';
 import express, { type RequestHandler, type Request, type Response } from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 
 import { Global } from '../adapters';
 import { swaggerSpec } from '../../infrastructure/swagger/swagger';
@@ -13,20 +15,29 @@ import path from 'path';
 
 export class FastfoodApp {
   private readonly _dbconnection: DbConnection;
+  private readonly _rabbitMqService: any;
   public readonly _app = express();
   private server: any = null;
 
-  constructor (dbconnection: DbConnection) {
+  constructor (dbconnection: DbConnection, rabbitMQService: any) {
     this._dbconnection = dbconnection;
+    this._rabbitMqService = rabbitMQService;
+
+    void OrdersRabbitmqController.startConsuming(this._dbconnection, this._rabbitMqService);
     this._app = express();
   }
 
   start (): void {
-    this._app.use(bodyParser.json());
+    this._app.use(bodyParser.json({ limit: '10mb' }));
+    this._app.disable('x-powered-by');
+
+    this._app.use(cors());
     this._app.use(
       (err: any, req: Request, res: Response, next: express.NextFunction) => {
         res.setHeader('Connection', 'keep-alive');
         res.setHeader('Keep-Alive', 'timeout=30');
+        res.setHeader('Content-Security-Policy', "default-src 'self'");
+        res.setHeader('X-Content-Type-Options', 'nosniff');
         if (err instanceof SyntaxError && err.message.includes('JSON')) {
           const errorGlobal: any = Global.error(
             'O body não esta em formato JSON, verifique e tente novamente.',
@@ -51,9 +62,16 @@ export class FastfoodApp {
     this._app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
     this._app.get('/', (async (_req: Request, res: Response): Promise<void> => {
+      res.status(200).send(JSON.stringify({
+        service: 'Orders',
+        version: 'TC-5'
+      }));
+    }) as RequestHandler);
+
+    this._app.get('/painel', (async (_req: Request, res: Response): Promise<void> => {
       const filePath = path.join(
         path.resolve(__dirname, '../../'),
-        'SimulationPage.html'
+        'Painel.html'
       );
       res.sendFile(filePath);
     }) as RequestHandler);
@@ -468,7 +486,8 @@ export class FastfoodApp {
       const order = await OrdersController.setOrder(
         customerId,
         orderItens,
-        this._dbconnection
+        this._dbconnection,
+        this._rabbitMqService
       );
       res.send(order);
     }) as RequestHandler);
@@ -707,13 +726,16 @@ export class FastfoodApp {
     this._app.put('/orders/:id', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { id } = req.params;
-      const { status, payment } = req.body;
+      const { status, payment, paymentReference, productionReference } = req.body;
 
       const products = await OrdersController.updateOrder(
         id,
         '',
         status,
         payment || null,
+        paymentReference ?? '',
+        productionReference ?? '',
+        this._rabbitMqService,
         this._dbconnection
       );
       res.send(products);
@@ -782,11 +804,13 @@ export class FastfoodApp {
       (async (req: Request, res: Response): Promise<void> => {
         res.setHeader('Content-type', 'application/json');
         const { id } = req.params;
-        const { payment } = req.body;
+        const { payment, paymentReference, productionReference } = req.body;
 
         const products = await OrdersController.updatePaymentOrder(
           id,
           payment,
+          paymentReference,
+          productionReference,
           this._dbconnection
         );
         res.send(products);
@@ -1060,7 +1084,6 @@ export class FastfoodApp {
         res.setHeader('Content-type', 'application/json');
         const { id } = req.params;
         const { name, size, type, base64 } = req.body;
-
         const products = await ProductsImagesController.setProductImage(
           id,
           name,
@@ -1447,6 +1470,8 @@ export class FastfoodApp {
      *                 type: number
      *               birthdate:
      *                 type: date
+     *               phone:
+     *                 type: string
      *               subscription:
      *                 type: string
      *     responses:
@@ -1488,13 +1513,14 @@ export class FastfoodApp {
      */
     this._app.post('/customers', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
-      const { name, mail, cpf, birthdate, subscription } = req.body;
+      const { name, mail, cpf, birthdate, phone, subscription } = req.body;
 
       const products = await CustomersController.setCustomer(
         name,
         mail,
         cpf,
         birthdate,
+        phone,
         subscription,
         this._dbconnection
       );
@@ -1572,7 +1598,7 @@ export class FastfoodApp {
     this._app.put('/customers/:id', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { id } = req.params;
-      const { name, mail, cpf, birthdate, subscription } = req.body;
+      const { name, mail, cpf, birthdate, phone, subscription } = req.body;
 
       const products = await CustomersController.updateCustomer(
         id,
@@ -1580,6 +1606,7 @@ export class FastfoodApp {
         mail,
         cpf,
         birthdate,
+        phone,
         subscription,
         this._dbconnection
       );
@@ -1634,6 +1661,97 @@ export class FastfoodApp {
       );
       res.send(products);
     }) as RequestHandler);
+
+    /**
+     * @swagger
+     * /customers/lgpd:
+     *   post:
+     *     summary: Efetua remoção de dasos sensiveis solicitados pelo cliente
+     *     tags:
+     *       - Customers
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               cpf:
+     *                 type: number
+     *               remove_name:
+     *                 type: boolean
+     *               remove_phone:
+     *                 type: boolean
+     *               remove_mail:
+     *                 type: boolean
+     *               remove_all:
+     *                 type: boolean
+     *     responses:
+     *       200:
+     *         description: Successful response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *       404:
+     *         description: Products not found
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                 message:
+     *                   type: string
+     */
+    this._app.post('/customers/lgpd', (async (req: Request, res: Response): Promise<void> => {
+      res.setHeader('Content-type', 'application/json');
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { cpf, remove_name, remove_phone, remove_mail, remove_all } = req.body;
+
+      const customers = await CustomersController.getCustomers(
+        cpf,
+        this._dbconnection
+      );
+
+      const count = customers?.data?.length ?? 0;
+
+      if (count > 0) {
+        for (const customer of customers?.data) {
+          if (remove_all) {
+            await CustomersController.removeCustomersById(
+              customer?._id,
+              this._dbconnection
+            );
+          } else {
+            await CustomersController.updateCustomer(
+              customer?._id,
+              remove_name ? ' ' : customer?._name,
+              remove_mail ? ' ' : customer?._mail,
+              customer?._cpf,
+              customer?._birthdate,
+              remove_phone ? ' ' : customer?._phone,
+              customer?._subscription,
+              this._dbconnection
+            );
+          }
+        }
+      }
+      res.send({
+        statusCode: 200,
+        status: 'success',
+        data: {
+          affected: count
+        }
+      });
+    }) as RequestHandler);
+    this._app.use((req, res) => {
+      res.status(404).send('');
+    });
 
     this.server = this._app.listen(port, () => {
     });

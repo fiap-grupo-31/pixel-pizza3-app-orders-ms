@@ -30,6 +30,7 @@ class CustomersUseCases {
     mail: string,
     cpf: string,
     birthdate: Date,
+    phone: string,
     subscription: string,
     customersGateway: CustomersGatewayInterface
   ): Promise<Customers | null> {
@@ -43,6 +44,7 @@ class CustomersUseCases {
         mail,
         cpf,
         birthdate,
+        phone,
         subscription
       );
       return new Customers(
@@ -51,6 +53,7 @@ class CustomersUseCases {
         customer.mail,
         customer.cpf,
         customer.birthdate,
+        customer.phone,
         customer.subscription,
         customer.created_at,
         customer.updated_at
@@ -66,6 +69,7 @@ class CustomersUseCases {
     mail: string,
     cpf: string,
     birthdate: Date,
+    phone: string,
     subscription: string,
     customersGateway: CustomersGatewayInterface
   ): Promise<Customers | null> {
@@ -80,6 +84,7 @@ class CustomersUseCases {
         mail,
         cpf,
         birthdate,
+        phone,
         subscription
       );
       return new Customers(
@@ -88,6 +93,7 @@ class CustomersUseCases {
         customer.mail,
         customer.cpf,
         customer.birthdate,
+        customer.phone,
         customer.subscription,
         customer.created_at,
         customer.updated_at

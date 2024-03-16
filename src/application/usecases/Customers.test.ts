@@ -17,7 +17,7 @@ describe('CustomersUseCases', () => {
   });
 
   it('deve obter todos os clientes corretamente', async () => {
-    const customer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date(), '', new Date(), new Date());
+    const customer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date(), '', '', new Date(), new Date());
     const expectedCustomers: Customers[] = [customer];
     customersGatewayMock.findAll.mockResolvedValue(expectedCustomers);
 
@@ -31,7 +31,7 @@ describe('CustomersUseCases', () => {
   });
 
   it('deve obter clientes por parâmetro corretamente', async () => {
-    const customer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date(), '', new Date(), new Date());
+    const customer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date(), '', '', new Date(), new Date());
     const reference = { name: 'Anderson' };
     const expectedCustomers: Customers[] = [customer];
     customersGatewayMock.find.mockResolvedValue(expectedCustomers);
@@ -44,7 +44,7 @@ describe('CustomersUseCases', () => {
 
   it('deve obter um cliente por ID corretamente', async () => {
     const customerId = '1213213';
-    const expectedCustomer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date(), '', new Date(), new Date());
+    const expectedCustomer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date(), '', '', new Date(), new Date());
     customersGatewayMock.findId.mockResolvedValue(expectedCustomer);
 
     const resultado = await CustomersUseCases.getCustomersById(customerId, customersGatewayMock);
@@ -60,13 +60,13 @@ describe('CustomersUseCases', () => {
     const birthdate = new Date('1990-01-01');
     const subscription = 'premium';
 
-    const expectedCustomer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date('1990-01-01'), 'premium', new Date(), new Date());
+    const expectedCustomer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date('1990-01-01'), '', 'premium', new Date(), new Date());
     customersGatewayMock.persist.mockResolvedValue(expectedCustomer);
 
-    const resultado = await CustomersUseCases.setCustomer(name, mail, cpf, birthdate, subscription, customersGatewayMock);
+    const resultado = await CustomersUseCases.setCustomer(name, mail, cpf, birthdate, '', subscription, customersGatewayMock);
 
     expect(resultado).toEqual(expectedCustomer);
-    expect(customersGatewayMock.persist).toHaveBeenCalledWith(name, mail, cpf, birthdate, subscription);
+    expect(customersGatewayMock.persist).toHaveBeenCalledWith(name, mail, cpf, birthdate, '', subscription);
   });
 
   it('deve retornar erro em um novo cliente quando enviado incorretamente', async () => {
@@ -75,11 +75,11 @@ describe('CustomersUseCases', () => {
     const birthdate = new Date('1990-01-01');
     const subscription = 'premium';
 
-    const expectedCustomer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date('1990-01-01'), 'premium', new Date(), new Date());
+    const expectedCustomer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date('1990-01-01'), '', 'premium', new Date(), new Date());
     customersGatewayMock.persist.mockResolvedValue(expectedCustomer);
 
     try {
-      await CustomersUseCases.setCustomer('', mail, cpf, birthdate, subscription, customersGatewayMock);
+      await CustomersUseCases.setCustomer('', mail, cpf, birthdate, '', subscription, customersGatewayMock);
     } catch (error: any) {
       expect(error.message).toEqual('nome inválid');
     }
@@ -95,7 +95,7 @@ describe('CustomersUseCases', () => {
     customersGatewayMock.persist.mockResolvedValue(Promise.reject(new Error('Erro ao persistir')));
 
     try {
-      await CustomersUseCases.setCustomer(name, mail, cpf, birthdate, subscription, customersGatewayMock);
+      await CustomersUseCases.setCustomer(name, mail, cpf, birthdate, '', subscription, customersGatewayMock);
     } catch (error: any) {
       expect(error.message).toEqual('Erro ao persistir');
     }
@@ -109,13 +109,13 @@ describe('CustomersUseCases', () => {
     const birthdate = new Date('1990-01-01');
     const subscription = 'premium';
 
-    const expectedCustomer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date('1990-01-01'), 'premium', new Date(), new Date());
+    const expectedCustomer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date('1990-01-01'), '', 'premium', new Date(), new Date());
     customersGatewayMock.update.mockResolvedValue(expectedCustomer);
 
-    const resultado = await CustomersUseCases.updateCustomer(id, name, mail, cpf, birthdate, subscription, customersGatewayMock);
+    const resultado = await CustomersUseCases.updateCustomer(id, name, mail, cpf, birthdate, '', subscription, customersGatewayMock);
 
     expect(resultado).toEqual(expectedCustomer);
-    expect(customersGatewayMock.update).toHaveBeenCalledWith(id, name, mail, cpf, birthdate, subscription);
+    expect(customersGatewayMock.update).toHaveBeenCalledWith(id, name, mail, cpf, birthdate, '', subscription);
   });
 
   it('deve retornar erro ao atualizar um cliente quando enviado incorretamente', async () => {
@@ -125,11 +125,11 @@ describe('CustomersUseCases', () => {
     const birthdate = new Date('1990-01-01');
     const subscription = 'premium';
 
-    const expectedCustomer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date('1990-01-01'), 'premium', new Date(), new Date());
+    const expectedCustomer = new Customers('1213213', 'Anderson', 'teste@teste.com.br', '33811205811', new Date('1990-01-01'), '', 'premium', new Date(), new Date());
     customersGatewayMock.update.mockResolvedValue(expectedCustomer);
 
     try {
-      await CustomersUseCases.updateCustomer(id, '', mail, cpf, birthdate, subscription, customersGatewayMock);
+      await CustomersUseCases.updateCustomer(id, '', mail, cpf, birthdate, '', subscription, customersGatewayMock);
     } catch (error: any) {
       expect(error.message).toEqual('nome inválid');
     }
@@ -146,7 +146,7 @@ describe('CustomersUseCases', () => {
     customersGatewayMock.update.mockResolvedValue(Promise.reject(new Error('failure update')));
 
     try {
-      await CustomersUseCases.updateCustomer(id, name, mail, cpf, birthdate, subscription, customersGatewayMock);
+      await CustomersUseCases.updateCustomer(id, name, mail, cpf, birthdate, '', subscription, customersGatewayMock);
     } catch (error: any) {
       expect(error.message).toEqual('failure update');
     }

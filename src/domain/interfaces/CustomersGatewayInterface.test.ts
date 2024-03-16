@@ -1,7 +1,7 @@
 import { type CustomersGatewayInterface } from './CustomersGatewayInterface';
 import { Customers } from '../../domain/entities/Customers';
 
-const mockCustomer: Customers = new Customers('123', 'John Doe', 'john@example.com', '33811205811', new Date('1990-01-01'), 'premium', new Date(), new Date());
+const mockCustomer: Customers = new Customers('123', 'John Doe', 'john@example.com', '33811205811', new Date('1990-01-01'), '5511988398795', 'premium', new Date(), new Date());
 
 const customersGatewayMock: CustomersGatewayInterface | any = {
   findId: jest.fn(),
