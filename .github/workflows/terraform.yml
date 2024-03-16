@@ -143,6 +143,7 @@ jobs:
         sed -i 's|REPLACE_ROUTE_APIGATEWAY|'"$ENDPOINT_KONG"'|g' k8s/configmap.yaml
         cat k8s/configmap.yaml
         cp k8s/deployment.tmpl.yaml k8s/deployment.yaml
+        cp k8s/rabiitmq.tmpl.yaml k8s/rabiitmq.yaml
         sed -i 's|ENDPOINT_ECR|'"$ENDPOINT_ECR"'|g' k8s/deployment.yaml
         cat k8s/deployment.yaml
 
