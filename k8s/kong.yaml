@@ -3,10 +3,9 @@ kind: Ingress
 metadata:
   name: apis1
   annotations:
-    kubernetes.io/ingress.class: "kong"
     konghq.com/strip-path: "true"
-
 spec:
+  ingressClassName: "kong"
   rules:
     - http:
         paths:

@@ -6,9 +6,7 @@ spec:
   selector:
     app: fiap-app-orders-pod
   ports:
-    - protocol: TCP
+    - name: httpservice
+      protocol: TCP
       port: 8080
       targetPort: 8080
-    - protocol: TCP
-      port: 15672
-      targetPort: 15672
