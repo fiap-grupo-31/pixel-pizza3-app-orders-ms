@@ -334,22 +334,50 @@
 
     <script>
       $(document).ready(async function () {
-
+        const urls = prompt('Rota');
+        if(urls == null){
+          alert('oooo');
+          return false;
+        }
+        let urlAuth = '';
         let uriDefault = '';
         let uriPaymentsDefault = '';
         let uriProductionsDefault = '';
+        let token = '';
 
-        if(location.href.indexOf('/api/v1.0') > -1){
-          uriDefault = `${location.protocol}//${location.host}/api/v1.0/ms1/`;
-          uriPaymentsDefault = `${location.protocol}//${location.host}/api/v1.0/ms2/`;
-          uriProductionsDefault = `${location.protocol}//${location.host}/api/v1.0/ms3/`;
+        if(urls.indexOf('amazonaws.com') > -1){
+          console.log(urls)
+          urlAuth = `${urls}/authenticate`;
+          uriDefault = `${urls}/api/v1.0/ms1/`;
+          uriPaymentsDefault = `${urls}/api/v1.0/ms2/`;
+          uriProductionsDefault = `${urls}/api/v1.0/ms3/`;
+
+          await new Promise(function(resolve, error ) {
+            $.ajax({
+              url: urlAuth,
+              method: 'POST',
+              data: JSON.stringify({
+                  "_cpf": "33811205811"
+              }),
+              contentType: 'application/json',
+              headers: {},
+              success: function (response) {
+                response = JSON.parse(response)
+                token = response.accessToken
+                resolve(response);
+              },
+              error: function (error) {
+                resolve(error);
+              },
+            });
+          })
+          
         }else{
           uriDefault = `${location.protocol}//${location.host}/`;
           uriPaymentsDefault = `${location.protocol}//localhost:8081/`;
           uriProductionsDefault = `${location.protocol}//localhost:8082/`;
         }
 
-        let token = '';
         const pace = (check) => {
           if (check) {
             return $('#pace').show();
@@ -358,6 +386,7 @@
         };
 
         pace(false);
+
 
         const http = {
           get: async (url, header) => {
