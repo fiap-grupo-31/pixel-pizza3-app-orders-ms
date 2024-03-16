@@ -221,5 +221,31 @@ describe('FastfoodApp', () => {
       const response = await request(fastfoodApp._app).delete('/orders/:id');
       expect(response.headers['content-type']).toContain('application/json');
     });
+
+    it('deve responder corretamente ao endpoint /customers/lgpd (post)', async () => {
+      const mockProductionData = JSON.stringify({
+        cpf: '33811205811',
+        remove_name: true,
+        remove_phone: true,
+        remove_mail: true,
+        remove_all: true
+      });
+
+      const mockProductionData2 = JSON.stringify({
+        data: [
+          mockProductionData
+        ]
+      });
+      (CustomersController.getCustomers as jest.Mock).mockResolvedValue(mockProductionData2);
+      (CustomersController.updateCustomer as jest.Mock).mockResolvedValue(mockProductionData);
+
+      const response = await request(fastfoodApp._app).post('/customers/lgpd');
+      expect(response.headers['content-type']).toContain('application/json');
+    });
+
+    it('deve responder 404 ao endpoint nao mapeado', async () => {
+      const response = await request(fastfoodApp._app).get('/xxxx');
+      expect(response.status).toEqual(404);
+    });
   });
 });
