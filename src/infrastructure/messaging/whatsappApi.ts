@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { AxiosHttpClient } from '../../infrastructure/external/http/axios-client';
 
 export interface MessageApi {
@@ -17,7 +18,7 @@ export class AxiosMessageApi implements MessageApi {
       const message = await httpClient.post(
         'https://cluster.apigratis.com/api/v2/whatsapp/sendText',
         {
-          number: number,
+          number,
           text: message,
           time_typing: 1
         }, {
