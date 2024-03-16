@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import { AxiosHttpClient } from '../../infrastructure/external/http/axios-client';
 
 export interface MessageApi {
-  sendMessage: (number: string, message: string) => Promise<void>
+  sendMessage: (number: string, message: string) => Promise<boolean>
 }
 
 export class AxiosMessageApi implements MessageApi {
@@ -15,7 +14,7 @@ export class AxiosMessageApi implements MessageApi {
   async sendMessage (number: string, message: string): Promise<boolean> {
     try {
       const httpClient = new AxiosHttpClient('');
-      const message = await httpClient.post(
+      const messages = await httpClient.post(
         'https://cluster.apigratis.com/api/v2/whatsapp/sendText',
         {
           number,
@@ -30,7 +29,7 @@ export class AxiosMessageApi implements MessageApi {
         }
       )
 
-      if (message?.data?.message) {
+      if (messages?.data?.message) {
         return true;
       }
 
