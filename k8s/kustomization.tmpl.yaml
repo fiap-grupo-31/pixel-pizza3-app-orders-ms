@@ -1,7 +1,6 @@
 resources:
 - configmap.yaml
 - deployment.yaml
-- rabiitmq.yaml
 - service.yaml
 - kong.yaml
 
