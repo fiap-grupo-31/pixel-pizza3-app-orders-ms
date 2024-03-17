@@ -23,7 +23,7 @@ export class WhatsappApiAdapter implements WhatsappApiAdapterInterface {
         {
           headers: {
             'Content-Type': 'application/json',
-            DeviceToken: '1cb1517a-f35d-4c58-bb46-5283f0ce4be8',
+            DeviceToken: '4915d6bb-4b31-47c5-a387-8671ae408dc9',
             Authorization: 'Bearer ' + process.env.TOKEN_WHATSAPP
           }
         });
